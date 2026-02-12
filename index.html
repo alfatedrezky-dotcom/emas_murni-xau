@@ -164,6 +164,25 @@
         document.getElementById('monthly-pl').innerText = `Rp ${bal.toLocaleString()}`;
         document.getElementById('total-in').innerText = tin.toLocaleString();
         document.getElementById('total-out').innerText = tout.toLocaleString();
+
+        function generateGmailJournal() {
+    let content = "--- BUKU JURNAL KEUANGAN PROFESIONAL ---\n\n";
+    let totalIn = 0, totalOut = 0;
+
+    // Membaca data dari Permanent Ledger Anda
+    financeData.forEach((item, i) => {
+        content += `${i+1}. [${item.date}] ${item.desc}: Rp ${item.amount.toLocaleString()}\n`;
+        if(item.type === 'IN') totalIn += item.amount;
+        else totalOut += item.amount;
+    });
+
+    content += `\nRINGKASAN:\nTotal In: Rp ${totalIn.toLocaleString()}\nTotal Out: Rp ${totalOut.toLocaleString()}\nNet: Rp ${(totalIn - totalOut).toLocaleString()}`;
+
+    // Membuka Gmail otomatis
+    const mailto = `mailto:rezkyalfayed56@gmail.com?subject=Laporan Jurnal Bulanan&body=${encodeURIComponent(content)}`;
+    window.location.href = mailto;
+        }
+        
     }
 </script>
 </body>
