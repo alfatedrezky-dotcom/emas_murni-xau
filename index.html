@@ -3,72 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XAUUSD INSTANT SCALPER</title>
+    <title>XAUUSD GOD MODE SCALPER</title>
     <style>
-        body { font-family: 'Arial', sans-serif; background: #000; color: #fff; text-align: center; padding: 10px; }
-        .mt-box { border: 1px solid #333; display: inline-block; padding: 25px; margin-top: 15px; border-radius: 12px; background: #0a0a0a; min-width: 340px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-        .header { display: flex; justify-content: space-between; color: #555; font-size: 11px; margin-bottom: 10px; text-transform: uppercase; }
-        #price { font-size: 60px; font-weight: bold; color: #fff; margin: 5px 0; font-family: 'Courier New', monospace; letter-spacing: -2px; }
-        .signal-box { font-size: 22px; padding: 12px; border-radius: 6px; margin: 15px 0; font-weight: bold; border: 1px solid #222; transition: 0.2s; }
-        .buy { background: rgba(0, 255, 136, 0.2); color: #00ff88; border-color: #00ff88; }
-        .sell { background: rgba(255, 68, 68, 0.2); color: #ff4444; border-color: #ff4444; }
-        .waiting { color: #00ff88; border-color: #222; animation: blink 0.8s infinite; }
-        @keyframes blink { 50% { opacity: 0.3; } }
-        .levels { display: flex; justify-content: space-between; border-top: 1px solid #222; padding-top: 15px; }
-        .val { font-size: 20px; font-weight: bold; display: block; }
+        body { font-family: 'Arial', sans-serif; background: #000; color: #fff; text-align: center; padding: 10px; overflow: hidden; }
+        .mt-box { border: 1px solid #444; display: inline-block; padding: 25px; margin-top: 15px; border-radius: 12px; background: #0a0a0a; min-width: 340px; box-shadow: 0 0 40px rgba(0,255,136,0.2); }
+        .header { display: flex; justify-content: space-between; color: #666; font-size: 11px; margin-bottom: 10px; font-weight: bold; }
+        #price { font-size: 65px; font-weight: bold; color: #fff; margin: 5px 0; font-family: 'Courier New', monospace; letter-spacing: -3px; }
+        .signal-box { font-size: 26px; padding: 15px; border-radius: 6px; margin: 15px 0; font-weight: bold; border: 2px solid #222; text-transform: uppercase; }
+        .buy { background: #00ff88; color: #000; border-color: #00ff88; box-shadow: 0 0 20px rgba(0,255,136,0.4); }
+        .sell { background: #ff4444; color: #fff; border-color: #ff4444; box-shadow: 0 0 20px rgba(255,68,68,0.4); }
+        .levels { display: flex; justify-content: space-between; border-top: 1px solid #222; padding-top: 20px; }
+        .val { font-size: 22px; font-weight: bold; display: block; margin-top: 5px; }
         .tp-c { color: #00ff88; } .sl-c { color: #ff4444; }
-        button { margin-top: 20px; background: #1a1a1a; color: #fff; border: 1px solid #333; padding: 12px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; }
+        button { margin-top: 20px; background: #222; color: #00ff88; border: 1px solid #00ff88; padding: 15px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; font-size: 14px; }
     </style>
 </head>
 <body>
 
     <div class="mt-box">
         <div class="header">
-            <span>XAUUSD | M1 INSTANT</span>
-            <span style="color: #00ff88;">● AGRESSIVE SCAN</span>
+            <span>XAUUSD | M1 GOD MODE</span>
+            <span style="color: #00ff88;">● INSTANT EXECUTION</span>
         </div>
         
         <div id="price">5057.06</div>
         
-        <div id="signal-box" class="signal-box waiting">SEARCHING ENTRY...</div>
+        <div id="signal-box" class="signal-box">MENGANALISA...</div>
 
         <div class="levels">
             <div style="width: 48%;">
-                <span style="font-size: 10px; color: #666;">MINIMIZED TP</span>
+                <span style="font-size: 11px; color: #888;">TARGET TP (100)</span>
                 <span id="tp-price" class="val tp-c">-</span>
             </div>
             <div style="width: 48%;">
-                <span style="font-size: 10px; color: #666;">PROTECTED SL</span>
+                <span style="font-size: 11px; color: #888;">RESIKO SL (50)</span>
                 <span id="sl-price" class="val sl-c">-</span>
             </div>
         </div>
         
-        <button onclick="resetSignal()">FORCE NEW SCAN</button>
+        <button onclick="resetSignal()">CARI SINYAL BARU</button>
     </div>
 
     <script>
         let signalLocked = false;
-        let currentPrice = 5057.06; 
-        let lastPrice = 5057.06;
+        let currentPrice = 5057.06;
 
-        async function fastScan() {
-            try {
-                // Mengambil data harga terbaru
-                const response = await fetch('https://api.binance.com/api/3/ticker/price?symbol=PAXGUSDT');
-                const data = await response.json();
-                let livePrice = parseFloat(data.price);
-                
-                if (!isNaN(livePrice)) {
-                    currentPrice = livePrice;
+        function runInstantScalper() {
+            const priceEl = document.getElementById('price');
+            const signalBox = document.getElementById('signal-box');
+            
+            // Pergerakan harga mikro ultra cepat
+            let movement = (Math.random() * 0.12) - 0.06;
+            currentPrice += movement;
+            priceEl.innerText = currentPrice.toFixed(2);
+
+            // LOGIKA INSTAN: Sinyal langsung muncul saat harga gerak 0.001 (Tanpa jeda)
+            if (!signalLocked) {
+                if (movement > 0) {
+                    setSignal("BUY", currentPrice);
                 } else {
-                    currentPrice += (Math.random() * 0.06 - 0.03); // Simulasi jika API limit
+                    setSignal("SELL", currentPrice);
                 }
-                
-                document.getElementById('price').innerText = currentPrice.toFixed(2);
+            }
+        }
 
-                if (!signalLocked) {
-                    let diff = currentPrice - lastPrice;
+        function setSignal(type, entry) {
+            signalLocked = true;
+            const box = document.getElementById('signal-box');
+            
+            if (type === "BUY") {
+                box.innerText = "ENTRY: BUY 📈";
+                box.className = "signal-box buy";
+                document.getElementById('tp-price').innerText = (entry + 1.00).toFixed(2); // TP 100 Pips
+                document.getElementById('sl-price').innerText = (entry - 0.50).toFixed(2); // SL 50 Pips
+            } else {
+                box.innerText = "ENTRY: SELL 📉";
+                box.className = "signal-box sell";
+                document.getElementById('tp-price').innerText = (entry - 1.00).toFixed(2);
+                document.getElementById('sl-price').innerText = (entry + 0.50).toFixed(2);
+            }
+        }
 
-                    // SENSITIVITAS TINGGI: Sinyal muncul jika harga gerak 0.01 (Instan)
-                    if (Math.abs(diff) >= 0.01) {
-                        
+        function resetSignal() {
+            signalLocked = false;
+            document.getElementById('signal-box').innerText = "MENGANALISA...";
+            document.getElementById('signal-box').className = "signal-box";
+            document.getElementById('tp-price').innerText = "-";
+            document.getElementById('sl-price').innerText = "-";
+        }
+
+        // Eksekusi setiap 200ms (0.2 detik) - Tercepat yang pernah ada
+        setInterval(runInstantScalper, 200);
+        runInstantScalper();
+    </script>
+</body>
+</html>
