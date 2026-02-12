@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XI-1 Gold Monitor</title>
+    <style>
+        body { font-family: 'Courier New', monospace; background: #000; color: #fff; text-align: center; padding: 20px; }
+        .box { border: 1px dashed #fff; display: inline-block; padding: 20px; margin-top: 50px; }
+        #price { font-size: 32px; font-weight: bold; margin: 20px 0; }
+        .sell { color: #ff4444; } .buy { color: #00ff88; }
+        .info { font-size: 10px; color: #888; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h3>=====================<br>TRADING MONITOR XI-1<br>=====================</h3>
+        <p>Harga Emas Saat Ini:</p>
+        <div id="price">Memuat...</div>
+        <div id="signal">STATUS: [ MENGANALISA ]</div>
+        <p class="info">Update otomatis setiap 5 detik... (Real-time)</p>
+    </div>
+
+    <script>
+        async function fetchPrice() {
+            try {
+                // Mengambil harga emas dari API Binance
+                const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT');
+                const data = await res.json();
+                const harga = parseFloat(data.price).toFixed(2);
+                document.getElementById('price').innerText = "$" + harga;
+                
+                const sig = document.getElementById('signal');
+                // Logika sinyal sesuai monitor Termux kamu
+                if (harga > 2650) {
+                    sig.innerHTML = "STATUS: [ <span class='sell'>🔻 SINYAL SELL</span> ]<br>Harga tinggi, ambil untung!";
+                } else if (harga < 2600) {
+                    sig.innerHTML = "STATUS: [ <span class='buy'>🚀 SINYAL BUY</span> ]<br>Harga murah, beli sekarang!";
+                } else {
+                    sig.innerText = "STATUS: [ ⏳ WAIT / SIDEWAYS ]";
+                }
+            } catch (e) { document.getElementById('price').innerText = "Koneksi Error"; }
+        }
+        setInterval(fetchPrice, 5000); 
+        fetchPrice();
+    </script>
+</body>
+</html>
