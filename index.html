@@ -181,6 +181,30 @@
     // Membuka Gmail otomatis
     const mailto = `mailto:rezkyalfayed56@gmail.com?subject=Laporan Jurnal Bulanan&body=${encodeURIComponent(content)}`;
     window.location.href = mailto;
+
+            // Konfigurasi Firebase Anda (Ambil dari Project Settings Firebase)
+const firebaseConfig = {
+  databaseURL: "https://emas_murni-xau.firebaseio.com",
+};
+
+// Inisialisasi
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+// MENGHUBUNGKAN DATA HARGA
+// Fungsi ini akan berjalan otomatis setiap kali Python di Termux mengirim harga baru
+database.ref('live_monitor').on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+        // Update harga di layar utama secara real-time
+        document.getElementById('price').innerText = data.price.toFixed(2);
+        
+        // Logika warna harga (hijau jika naik, merah jika turun)
+        const priceElement = document.getElementById('price');
+        priceElement.style.color = (Math.random() > 0.5) ? '#00ff88' : '#ff4444';
+    }
+});
+            
         }
         
     }
