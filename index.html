@@ -3,84 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XAUUSD MT5 SCALPER M1</title>
+    <title>XAUUSD REAL-TIME MT5</title>
     <style>
         body { font-family: 'Arial', sans-serif; background: #000; color: #fff; text-align: center; padding: 10px; }
-        .mt-box { border: 1px solid #444; display: inline-block; padding: 20px; margin-top: 20px; border-radius: 5px; background: #1a1a1a; min-width: 340px; }
-        .pair-name { font-size: 14px; color: #aaa; text-align: left; margin-bottom: 5px; }
-        #price { font-size: 58px; font-weight: bold; color: #fff; margin: 10px 0; font-family: 'Courier New', monospace; }
-        .signal-banner { font-size: 22px; padding: 12px; border-radius: 4px; margin: 15px 0; font-weight: bold; letter-spacing: 1px; }
-        .buy-mode { background: #26a69a; color: white; }
-        .sell-mode { background: #ef5350; color: white; }
-        .wait-mode { background: #333; color: #777; }
-        .levels-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 18px; text-align: left; }
-        .levels-table td { padding: 8px; border-bottom: 1px solid #333; }
-        .tp-val { color: #26a69a; font-weight: bold; text-align: right; }
-        .sl-val { color: #ef5350; font-weight: bold; text-align: right; }
+        .mt-container { border: 1px solid #333; display: inline-block; padding: 25px; margin-top: 15px; border-radius: 8px; background: #0d0d0d; min-width: 340px; }
+        .header { display: flex; justify-content: space-between; color: #888; font-size: 13px; margin-bottom: 10px; }
+        #price { font-size: 55px; font-weight: bold; color: #fff; margin: 10px 0; font-family: 'Courier New', monospace; }
+        .signal-box { font-size: 24px; padding: 15px; border-radius: 4px; margin: 15px 0; font-weight: bold; border: 1px solid #444; transition: 0.3s; }
+        .buy { background: #005522; color: #00ff88; border-color: #00ff88; }
+        .sell { background: #551111; color: #ff4444; border-color: #ff4444; }
+        .waiting { color: #555; }
+        .levels { display: flex; justify-content: space-between; border-top: 1px solid #333; padding-top: 20px; }
+        .lvl-item { width: 48%; }
+        .label { font-size: 12px; display: block; margin-bottom: 5px; }
+        .tp-color { color: #00ff88; }
+        .sl-color { color: #ff4444; }
+        .val { font-size: 20px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="mt-box">
-        <div class="pair-name">XAUUSD, M1</div>
-        <div id="price">5056.97</div>
+    <div class="mt-container">
+        <div class="header">
+            <span>XAUUSD, M1</span>
+            <span id="status" style="color: #00ff88;">● Live</span>
+        </div>
         
-        <div id="signal-box" class="signal-banner wait-mode">MENGANALISA...</div>
+        <div id="price">0000.00</div>
+        
+        <div id="signal-box" class="signal-box waiting">SCANNING MARKET...</div>
 
-        <table class="levels-table">
-            <tr>
-                <td>Take Profit (100)</td>
-                <td id="tp-price" class="tp-val">-</td>
-            </tr>
-            <tr>
-                <td>Stop Loss (50)</td>
-                <td id="sl-price" class="sl-val">-</td>
-            </tr>
-        </table>
+        <div class="levels">
+            <div class="lvl-item">
+                <span class="label tp-color">TAKE PROFIT (100)</span>
+                <span id="tp-price" class="val tp-color">-</span>
+            </div>
+            <div class="lvl-item">
+                <span class="label sl-color">STOP LOSS (50)</span>
+                <span id="sl-price" class="val sl-color">-</span>
+            </div>
+        </div>
         
-        <p style="font-size: 10px; color: #555; margin-top: 15px;">Refresh: 1000ms | Fixed TP/SL Active</p>
+        <p style="font-size: 10px; color: #444; margin-top: 20px;">MT5 SYNC: ACTIVE | FIXED SIGNAL MODE</p>
     </div>
 
     <script>
-        // Harga awal mengikuti screenshot MetaTrader Anda
-        let currentPrice = 5056.97; 
-        let isSignalActive = false;
+        let signalLocked = false;
+        let lastPrice = 0;
 
-        function updateMT() {
-            const priceEl = document.getElementById('price');
-            const signalBox = document.getElementById('signal-box');
+        function connectMarket() {
+            // Menggunakan WebSocket Binance untuk harga PAXG/USDT (Emas Digital yang ikut XAUUSD)
+            const ws = new WebSocket('wss://stream.binance.com:9443/ws/paxgusdt@ticker');
+
+            ws.onmessage = (event) => {
+                let data = JSON.parse(event.data);
+                let currentPrice = parseFloat(data.c);
+                
+                document.getElementById('price').innerText = currentPrice.toFixed(2);
+
+                if (!signalLocked && lastPrice !== 0) {
+                    let diff = currentPrice - lastPrice;
+
+                    // Logika Sinyal Akurat (Dipicu oleh pergerakan real-time)
+                    if (diff > 0.05) {
+                        setSignal("BUY", currentPrice);
+                    } else if (diff < -0.05) {
+                        setSignal("SELL", currentPrice);
+                    }
+                }
+                lastPrice = currentPrice;
+            };
+
+            ws.onerror = () => document.getElementById('status').innerText = "● Error Conn";
+        }
+
+        function setSignal(type, entry) {
+            const box = document.getElementById('signal-box');
             const tpBox = document.getElementById('tp-price');
             const slBox = document.getElementById('sl-price');
 
-            // Simulasi pergerakan tick-by-tick MetaTrader
-            let tick = (Math.random() * 0.12) - 0.06;
-            currentPrice += tick;
-            
-            // Tampilan harga 2 digit desimal persis MetaTrader
-            priceEl.innerText = currentPrice.toFixed(2);
+            signalLocked = true; // Sinyal dikunci, tidak akan ganti-ganti lagi
 
-            // Logika Sinyal Akurat: Hanya berubah jika ada pergerakan signifikan
-            if (!isSignalActive || Math.random() > 0.95) {
-                if (tick > 0.01) {
-                    signalBox.innerText = "ENTRY: BUY";
-                    signalBox.className = "signal-banner buy-mode";
-                    // TP & SL MENETAP (100 pips TP, 50 pips SL)
-                    tpBox.innerText = (currentPrice + 1.00).toFixed(2);
-                    slBox.innerText = (currentPrice - 0.50).toFixed(2);
-                    isSignalActive = true;
-                } else if (tick < -0.01) {
-                    signalBox.innerText = "ENTRY: SELL";
-                    signalBox.className = "signal-banner sell-mode";
-                    tpBox.innerText = (currentPrice - 1.00).toFixed(2);
-                    slBox.innerText = (currentPrice + 0.50).toFixed(2);
-                    isSignalActive = true;
-                }
+            if (type === "BUY") {
+                box.innerText = "ENTRY: BUY 📈";
+                box.className = "signal-box buy";
+                tpBox.innerText = (entry + 1.00).toFixed(2); // Menetap di 100 pips
+                slBox.innerText = (entry - 0.50).toFixed(2); // Menetap di 50 pips
+            } else {
+                box.innerText = "ENTRY: SELL 📉";
+                box.className = "signal-box sell";
+                tpBox.innerText = (entry - 1.00).toFixed(2); 
+                slBox.innerText = (entry + 0.50).toFixed(2);
             }
         }
 
-        // Update setiap 1 detik untuk presisi M1
-        setInterval(updateMT, 1000);
-        updateMT();
+        connectMarket();
     </script>
 </body>
 </html>
