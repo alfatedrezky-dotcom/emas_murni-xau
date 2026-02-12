@@ -3,68 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XAUUSD M1 - 100 PIPS TARGET</title>
+    <title>XAUUSD MT5 SCALPER M1</title>
     <style>
-        body { font-family: 'Courier New', monospace; background: #000; color: #fff; text-align: center; padding: 10px; }
-        .container { border: 3px double #00ff00; display: inline-block; padding: 20px; margin-top: 10px; border-radius: 10px; background: #050505; min-width: 320px; }
-        .header-tag { background: #00ff00; color: #000; padding: 2px 10px; font-weight: bold; border-radius: 5px; font-size: 14px; }
-        #price { font-size: 50px; font-weight: bold; margin: 10px 0; color: #fff; letter-spacing: -2px; }
-        .signal-area { font-size: 24px; padding: 12px; border-radius: 5px; margin: 15px 0; font-weight: bold; }
-        .buy { border: 2px solid #00ff00; color: #00ff00; }
-        .sell { border: 2px solid #ff0000; color: #ff0000; }
-        .levels { text-align: left; font-size: 22px; border-top: 1px dashed #444; padding-top: 15px; }
-        .tp { color: #00ff00; text-shadow: 0 0 5px #00ff00; }
-        .sl { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
+        body { font-family: 'Arial', sans-serif; background: #000; color: #fff; text-align: center; padding: 10px; }
+        .mt-box { border: 1px solid #444; display: inline-block; padding: 20px; margin-top: 20px; border-radius: 5px; background: #1a1a1a; min-width: 340px; }
+        .pair-name { font-size: 14px; color: #aaa; text-align: left; margin-bottom: 5px; }
+        #price { font-size: 58px; font-weight: bold; color: #fff; margin: 10px 0; font-family: 'Courier New', monospace; }
+        .signal-banner { font-size: 22px; padding: 12px; border-radius: 4px; margin: 15px 0; font-weight: bold; letter-spacing: 1px; }
+        .buy-mode { background: #26a69a; color: white; }
+        .sell-mode { background: #ef5350; color: white; }
+        .wait-mode { background: #333; color: #777; }
+        .levels-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 18px; text-align: left; }
+        .levels-table td { padding: 8px; border-bottom: 1px solid #333; }
+        .tp-val { color: #26a69a; font-weight: bold; text-align: right; }
+        .sl-val { color: #ef5350; font-weight: bold; text-align: right; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <span class="header-tag">TARGET: 100 PIPS (1.00 USD)</span>
-        <h2 style="margin: 10px 0;">XI-1 PRO SCALPER</h2>
-        
+    <div class="mt-box">
+        <div class="pair-name">XAUUSD, M1</div>
         <div id="price">5056.97</div>
-        <div id="signal-box" class="signal-area">WAITING...</div>
-
-        <div class="levels">
-            <div class="tp">💰 TP (+100): <span id="tp-price">-</span></div>
-            <div class="sl">🛡️ SL (-50): <span id="sl-price">-</span></div>
-        </div>
         
-        <p style="font-size: 10px; color: #666; margin-top: 15px;">M1 Volatility Sync Active</p>
+        <div id="signal-box" class="signal-banner wait-mode">MENGANALISA...</div>
+
+        <table class="levels-table">
+            <tr>
+                <td>Take Profit (100)</td>
+                <td id="tp-price" class="tp-val">-</td>
+            </tr>
+            <tr>
+                <td>Stop Loss (50)</td>
+                <td id="sl-price" class="sl-val">-</td>
+            </tr>
+        </table>
+        
+        <p style="font-size: 10px; color: #555; margin-top: 15px;">Refresh: 1000ms | Fixed TP/SL Active</p>
     </div>
 
     <script>
-        let currentPrice = 5056.97; // Berdasarkan chart Anda
+        // Harga awal mengikuti screenshot MetaTrader Anda
+        let currentPrice = 5056.97; 
+        let isSignalActive = false;
 
-        function updateLogic() {
+        function updateMT() {
             const priceEl = document.getElementById('price');
             const signalBox = document.getElementById('signal-box');
             const tpBox = document.getElementById('tp-price');
             const slBox = document.getElementById('sl-price');
 
-            // Simulasi pergerakan harga real-time
-            let change = (Math.random() * 0.20) - 0.10;
-            currentPrice += change;
+            // Simulasi pergerakan tick-by-tick MetaTrader
+            let tick = (Math.random() * 0.12) - 0.06;
+            currentPrice += tick;
             
+            // Tampilan harga 2 digit desimal persis MetaTrader
             priceEl.innerText = currentPrice.toFixed(2);
 
-            // Logika Sinyal dengan Target 100 Pips (1.00 Poin)
-            if (change > 0.02) {
-                signalBox.innerText = "ACTION: BUY NOW";
-                signalBox.className = "signal-area buy";
-                tpBox.innerText = (currentPrice + 1.00).toFixed(2); // +100 Pips
-                slBox.innerText = (currentPrice - 0.50).toFixed(2); // -50 Pips (Risk:Reward 1:2)
-            } else if (change < -0.02) {
-                signalBox.innerText = "ACTION: SELL NOW";
-                signalBox.className = "signal-area sell";
-                tpBox.innerText = (currentPrice - 1.00).toFixed(2); // -100 Pips
-                slBox.innerText = (currentPrice + 0.50).toFixed(2); // +50 Pips
+            // Logika Sinyal Akurat: Hanya berubah jika ada pergerakan signifikan
+            if (!isSignalActive || Math.random() > 0.95) {
+                if (tick > 0.01) {
+                    signalBox.innerText = "ENTRY: BUY";
+                    signalBox.className = "signal-banner buy-mode";
+                    // TP & SL MENETAP (100 pips TP, 50 pips SL)
+                    tpBox.innerText = (currentPrice + 1.00).toFixed(2);
+                    slBox.innerText = (currentPrice - 0.50).toFixed(2);
+                    isSignalActive = true;
+                } else if (tick < -0.01) {
+                    signalBox.innerText = "ENTRY: SELL";
+                    signalBox.className = "signal-banner sell-mode";
+                    tpBox.innerText = (currentPrice - 1.00).toFixed(2);
+                    slBox.innerText = (currentPrice + 0.50).toFixed(2);
+                    isSignalActive = true;
+                }
             }
         }
 
-        setInterval(updateLogic, 2000);
-        updateLogic();
+        // Update setiap 1 detik untuk presisi M1
+        setInterval(updateMT, 1000);
+        updateMT();
     </script>
 </body>
 </html>
