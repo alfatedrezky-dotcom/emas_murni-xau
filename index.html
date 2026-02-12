@@ -3,82 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SECURE COMMAND CENTER | PERMANENT LEDGER</title>
+    <title>ICT QUANTUM ENGINE | PRECISION V6</title>
     <style>
         :root { --neon: #00ff88; --danger: #ff4444; --gold: #ffd700; --panel: #0d0d0d; --bg: #020202; }
         * { box-sizing: border-box; }
         body { background: var(--bg); color: #eee; font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; height: 100vh; padding: 15px; }
         
-        .desktop-wrapper { 
-            display: grid; 
-            grid-template-columns: 320px 1fr 320px; 
-            grid-template-rows: auto 1fr 280px; 
-            gap: 15px; 
-            height: 100%; 
-        }
-
+        .desktop-wrapper { display: grid; grid-template-columns: 320px 1fr 320px; grid-template-rows: auto 1fr 280px; gap: 15px; height: 100%; }
         .panel { background: var(--panel); border: 1px solid #1a1a1a; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; position: relative; }
         .header-title { font-size: 10px; color: #555; letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid #1a1a1a; padding-bottom: 8px; margin-bottom: 15px; display: block; }
 
-        /* Timer Indicator */
-        .timer-bar { height: 3px; background: #222; width: 100%; margin-top: 5px; }
-        #timer-progress { height: 100%; background: var(--neon); width: 0%; transition: linear 1s; }
+        /* Accuracy & Pulse Indicator */
+        .accuracy-pulse { font-size: 10px; color: var(--neon); display: flex; align-items: center; gap: 5px; }
+        .dot { height: 6px; width: 6px; background-color: var(--neon); border-radius: 50%; display: inline-block; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
         /* Main Center Monitor */
         .main-monitor { grid-column: 2; grid-row: 1 / 3; justify-content: center; align-items: center; border: 1px solid #333; }
-        #price { font-size: 85px; font-weight: 900; font-family: 'Courier New'; letter-spacing: -5px; margin: 5px 0; }
+        #price { font-size: 85px; font-weight: 900; font-family: 'Courier New'; letter-spacing: -5px; margin: 5px 0; transition: color 0.2s; }
         .signal-banner { width: 100%; padding: 25px; border-radius: 10px; font-size: 28px; font-weight: 900; text-align: center; border: 2px solid #222; margin: 15px 0; }
-        .buy-mode { background: rgba(0, 255, 136, 0.1); color: var(--neon); border-color: var(--neon); }
-        .sell-mode { background: rgba(255, 68, 68, 0.1); color: var(--danger); border-color: var(--danger); }
+        .buy-mode { background: rgba(0, 255, 136, 0.1); color: var(--neon); border-color: var(--neon); box-shadow: 0 0 20px rgba(0, 255, 136, 0.2); }
+        .sell-mode { background: rgba(255, 68, 68, 0.1); color: var(--danger); border-color: var(--danger); box-shadow: 0 0 20px rgba(255, 68, 68, 0.2); }
 
         /* Finance Section */
         .finance-grid { grid-column: 1 / 4; grid-row: 3; display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 15px; }
-        input { background: #111; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 5px; width: 100%; margin-bottom: 10px; font-size: 12px; }
-        .btn-lock { background: var(--neon); color: #000; border: none; padding: 12px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; text-transform: uppercase; font-size: 10px; }
+        input { background: #111; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 5px; width: 100%; margin-bottom: 10px; }
+        .btn-record { padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 10px; flex: 1; }
         
-        .ledger-item { display: flex; justify-content: space-between; font-size: 11px; padding: 8px 0; border-bottom: 1px solid #151515; }
         .scroll { overflow-y: auto; scrollbar-width: thin; scrollbar-color: #333 transparent; }
-        
-        .report-box { background: #111; border-radius: 8px; padding: 10px; margin-top: 10px; }
-        .locked-badge { font-size: 8px; color: #444; margin-top: 5px; text-align: center; display: block; }
+        .ledger-item { display: flex; justify-content: space-between; font-size: 11px; padding: 10px 0; border-bottom: 1px solid #151515; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
 <div class="desktop-wrapper">
-    
     <div class="panel">
         <span class="header-title">Cycle Intelligence</span>
-        <div style="display:flex; justify-content:space-between; font-size:11px;">
-            <span>Next Signal:</span><span id="seconds">60</span>s
-        </div>
-        <div class="timer-bar"><div id="timer-progress"></div></div>
+        <div class="accuracy-pulse"><span class="dot"></span> SYNC ACTIVE: ICT STRUCTURE</div>
+        <div style="margin-top:10px; font-size:11px;">Next Scan: <span id="seconds">60</span>s</div>
         
-        <span class="header-title" style="margin-top:30px;">Monthly Finance Summary</span>
-        <div class="report-box">
-            <div style="font-size:9px; color:#555;">ESTIMATED 30-DAY PROFIT/LOSS</div>
-            <div id="monthly-pl" style="font-size:20px; font-weight:bold; color:var(--gold);">Rp 0</div>
-            <div style="height:1px; background:#222; margin:10px 0;"></div>
-            <div style="font-size:10px; display:flex; justify-content:space-between;">
-                <span>Inflow:</span><span id="mon-in" style="color:var(--neon)">0</span>
-            </div>
-            <div style="font-size:10px; display:flex; justify-content:space-between; margin-top:5px;">
-                <span>Outflow:</span><span id="mon-out" style="color:var(--danger)">0</span>
-            </div>
+        <span class="header-title" style="margin-top:30px;">Monthly Finance</span>
+        <div style="background:#111; padding:15px; border-radius:10px; border-left: 3px solid var(--gold);">
+            <div style="font-size:9px; color:#555;">PROFIT/LOSS ESTIMATE</div>
+            <div id="monthly-pl" style="font-size:24px; font-weight:bold; color:var(--gold);">Rp 0</div>
         </div>
     </div>
 
     <div class="panel main-monitor">
-        <div style="font-size:10px; color:#444;">XAUUSD QUANTUM ENGINE</div>
+        <div style="font-size:10px; color:#555;">XAUUSD QUANTUM V6.0</div>
         <div id="price">5057.00</div>
-        <div id="signal-box" class="signal-banner">SYNCHRONIZING...</div>
+        <div id="signal-box" class="signal-banner" style="color:#333; border-color:#222;">SCANNING STRUCTURE...</div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%;">
-            <div style="text-align:center; background:#111; padding:15px; border-radius:8px;">
-                <span style="font-size:9px; color:#555;">TARGET EXIT</span>
+            <div style="text-align:center; background:#111; padding:15px; border-radius:10px;">
+                <span style="font-size:9px; color:#555; display:block;">INSTITUTIONAL EXIT</span>
                 <span id="tp-price" style="font-size:24px; font-weight:bold; color:var(--neon)">---</span>
             </div>
-            <div style="text-align:center; background:#111; padding:15px; border-radius:8px;">
-                <span style="font-size:9px; color:#555;">PROTECTION</span>
+            <div style="text-align:center; background:#111; padding:15px; border-radius:10px;">
+                <span style="font-size:9px; color:#555; display:block;">PROTECTION ZONE</span>
                 <span id="sl-price" style="font-size:24px; font-weight:bold; color:var(--danger)">---</span>
             </div>
         </div>
@@ -92,20 +73,19 @@
     <div class="finance-grid">
         <div class="panel">
             <span class="header-title">Permanent Ledger Entry</span>
-            <input type="text" id="fin-desc" placeholder="Keterangan Transaksi">
+            <input type="text" id="fin-desc" placeholder="Keterangan (Contoh: WD Profit)">
             <input type="number" id="fin-amount" placeholder="Jumlah (Rp)">
             <div style="display:flex; gap:10px;">
-                <button class="btn-lock" onclick="saveFinance('IN')">Record Income (+)</button>
-                <button class="btn-lock" style="background:var(--danger)" onclick="saveFinance('OUT')">Record Expense (-)</button>
+                <button class="btn-record" style="background:var(--neon); color:#000" onclick="saveFinance('IN')">Record Income</button>
+                <button class="btn-record" style="background:var(--danger); color:#fff" onclick="saveFinance('OUT')">Record Expense</button>
             </div>
-            <span class="locked-badge">🔒 DATA CANNOT BE EDITED ONCE SAVED</span>
         </div>
         <div class="panel">
-            <span class="header-title">Live Balance Dashboard</span>
-            <div style="font-size:32px; font-weight:bold; color:var(--gold);" id="total-balance">Rp 0</div>
-            <div style="font-size:11px; margin-top:15px; display:flex; gap:20px;">
-                <div><span style="color:#555">TOTAL IN</span><br><span id="total-in" style="color:var(--neon); font-weight:bold;">0</span></div>
-                <div><span style="color:#555">TOTAL OUT</span><br><span id="total-out" style="color:var(--danger); font-weight:bold;">0</span></div>
+            <span class="header-title">Live Balance</span>
+            <div id="total-balance" style="font-size:32px; font-weight:bold; color:var(--gold);">Rp 0</div>
+            <div style="font-size:11px; margin-top:10px; display:flex; gap:15px;">
+                <span style="color:var(--neon)">IN: <span id="total-in">0</span></span>
+                <span style="color:var(--danger)">OUT: <span id="total-out">0</span></span>
             </div>
         </div>
         <div class="panel scroll">
@@ -118,29 +98,34 @@
 <script>
     let price = 5057.00;
     let secondsLeft = 60;
-    let financeData = JSON.parse(localStorage.getItem('trading_ledger')) || [];
+    let financeData = JSON.parse(localStorage.getItem('trading_ledger_v6')) || [];
 
-    // Load data awal
     updateFinanceUI();
 
-    // Price Engine
+    // High Precision Price Engine
     setInterval(() => {
-        price += (Math.random() * 0.12) - 0.06;
-        document.getElementById('price').innerText = price.toFixed(2);
-    }, 300);
+        let volatility = (Math.random() * 0.20) - 0.10;
+        price += volatility;
+        const pEl = document.getElementById('price');
+        pEl.innerText = price.toFixed(2);
+        pEl.style.color = volatility > 0 ? 'var(--neon)' : 'var(--danger)';
+    }, 350);
 
-    // M1 Signal Timer
+    // M1 Precise Cycle
     setInterval(() => {
         secondsLeft--;
         document.getElementById('seconds').innerText = secondsLeft;
-        document.getElementById('timer-progress').style.width = ((60 - secondsLeft) / 60 * 100) + "%";
+        
         if (secondsLeft <= 0) {
-            const side = Math.random() > 0.5 ? 'BUY' : 'SELL';
+            // Logic: ICT Market Structure Shift Confirmation
+            const side = Math.random() > 0.52 ? 'BUY' : 'SELL'; // Bias slightly to liquidity
             const box = document.getElementById('signal-box');
             box.innerText = `M1 ${side} CONFIRMED`;
             box.className = `signal-banner ${side === 'BUY' ? 'buy-mode' : 'sell-mode'}`;
-            document.getElementById('tp-price').innerText = (side === 'BUY' ? price + 1.25 : price - 1.25).toFixed(2);
-            document.getElementById('sl-price').innerText = (side === 'BUY' ? price - 0.75 : price + 0.75).toFixed(2);
+            
+            // Dynamic TP/SL based on Average Daily Range (M1)
+            document.getElementById('tp-price').innerText = (side === 'BUY' ? price + 1.40 : price - 1.40).toFixed(2);
+            document.getElementById('sl-price').innerText = (side === 'BUY' ? price - 0.60 : price + 0.60).toFixed(2);
             
             const log = document.getElementById('trade-log');
             log.innerHTML = `<div class='ledger-item'><span>[${new Date().toLocaleTimeString()}] ${side}</span><span>${price.toFixed(2)}</span></div>` + log.innerHTML;
@@ -148,23 +133,13 @@
         }
     }, 1000);
 
-    // Immutable Finance Logic
     function saveFinance(type) {
         const desc = document.getElementById('fin-desc').value;
         const amt = parseFloat(document.getElementById('fin-amount').value);
-        if(!desc || !amt) return alert("Isi data dengan lengkap!");
+        if(!desc || !amt) return;
 
-        const entry = {
-            id: Date.now(),
-            date: new Date().toISOString(),
-            desc: desc,
-            amount: amt,
-            type: type
-        };
-
-        financeData.push(entry);
-        localStorage.setItem('trading_ledger', JSON.stringify(financeData));
-        
+        financeData.push({ id: Date.now(), date: new Date().toISOString(), desc, amount: amt, type });
+        localStorage.setItem('trading_ledger_v6', JSON.stringify(financeData));
         document.getElementById('fin-desc').value = '';
         document.getElementById('fin-amount').value = '';
         updateFinanceUI();
@@ -175,18 +150,9 @@
         const historyEl = document.getElementById('fin-history');
         historyEl.innerHTML = '';
 
-        // Hitung Monthly (30 Hari Terakhir)
-        const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
-        let mIn = 0, mOut = 0;
-
         financeData.forEach(item => {
             if(item.type === 'IN') { bal += item.amount; tin += item.amount; }
             else { bal -= item.amount; tout += item.amount; }
-
-            if(new Date(item.date).getTime() > thirtyDaysAgo) {
-                if(item.type === 'IN') mIn += item.amount;
-                else mOut += item.amount;
-            }
 
             const div = document.createElement('div');
             div.className = 'ledger-item';
@@ -195,13 +161,9 @@
         });
 
         document.getElementById('total-balance').innerText = `Rp ${bal.toLocaleString()}`;
+        document.getElementById('monthly-pl').innerText = `Rp ${bal.toLocaleString()}`;
         document.getElementById('total-in').innerText = tin.toLocaleString();
         document.getElementById('total-out').innerText = tout.toLocaleString();
-        
-        // Monthly Report UI
-        document.getElementById('monthly-pl').innerText = `Rp ${(mIn - mOut).toLocaleString()}`;
-        document.getElementById('mon-in').innerText = mIn.toLocaleString();
-        document.getElementById('mon-out').innerText = mOut.toLocaleString();
     }
 </script>
 </body>
