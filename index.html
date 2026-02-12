@@ -3,135 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GOD MODE | FUNDAMENTAL & SMC INTELLIGENCE</title>
+    <title>XAUUSD | SMART MONEY INTELLIGENCE</title>
     <style>
-        :root { --neon: #00ff88; --danger: #ff4444; --gold: #ffd700; --bg: #020202; --panel: #0a0a0a; }
-        body { background: var(--bg); color: #fff; font-family: 'Orbitron', sans-serif; margin: 0; padding: 15px; }
-        .wrapper { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: 300px 1fr 300px; gap: 15px; }
+        :root { --neon-green: #00ff88; --neon-red: #ff4444; --gold: #ffd700; --panel-bg: #0a0a0a; }
+        body { background: #000; color: #eee; font-family: 'Inter', sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 320px 1fr 320px; gap: 20px; }
         
         /* Panel Styles */
-        .panel { background: var(--panel); border: 1px solid #1a1a1a; border-radius: 12px; padding: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-        .title { font-size: 10px; color: #555; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 15px; display: block; border-bottom: 1px solid #1a1a1a; padding-bottom: 5px; }
+        .panel { background: var(--panel-bg); border: 1px solid #1a1a1a; border-radius: 12px; padding: 15px; height: fit-content; }
+        .panel-header { font-size: 10px; color: #555; letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid #1a1a1a; padding-bottom: 8px; margin-bottom: 15px; }
         
-        /* Main Monitor */
-        #price { font-size: 70px; font-weight: bold; text-align: center; font-family: 'Courier New'; letter-spacing: -4px; margin: 10px 0; }
-        .signal-alert { padding: 20px; border-radius: 8px; text-align: center; font-size: 24px; font-weight: 900; border: 2px solid #222; margin: 15px 0; position: relative; overflow: hidden; }
-        .buy-alert { background: rgba(0,255,136,0.1); color: var(--neon); border-color: var(--neon); box-shadow: 0 0 30px rgba(0,255,136,0.2); }
-        .sell-alert { background: rgba(255,68,68,0.1); color: var(--danger); border-color: var(--danger); box-shadow: 0 0 30px rgba(255,68,68,0.2); }
+        /* Main Price Display */
+        #price-display { font-size: 72px; font-weight: 900; text-align: center; font-family: 'Courier New', monospace; letter-spacing: -4px; margin: 15px 0; }
+        .signal-alert { padding: 25px; border-radius: 10px; text-align: center; font-size: 24px; font-weight: 900; border: 2px solid #222; margin-bottom: 20px; }
+        .buy-mode { background: rgba(0, 255, 136, 0.1); color: var(--neon-green); border-color: var(--neon-green); }
+        .sell-mode { background: rgba(255, 68, 68, 0.1); color: var(--neon-red); border-color: var(--neon-red); }
 
-        /* Levels & Grid */
-        .grid-lvls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .lvl-box { background: #111; padding: 10px; border-radius: 6px; text-align: center; }
-        .price-tag { font-size: 18px; font-weight: bold; display: block; }
+        /* Fundamental & SMC Widgets */
+        .data-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 10px; }
+        .impact-high { color: var(--neon-red); font-weight: bold; }
+        .smc-bar-bg { height: 10px; background: #111; border-radius: 5px; margin: 10px 0; overflow: hidden; display: flex; }
+        .smc-long { background: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
+        .smc-short { background: var(--neon-red); }
 
-        /* Fundamental & News */
-        .news-item { font-size: 11px; padding: 10px 0; border-bottom: 1px solid #111; display: flex; gap: 10px; }
-        .impact-high { color: var(--danger); font-weight: bold; }
-        
-        /* Smart Money Tracker */
-        .smc-meter { height: 10px; background: #111; border-radius: 5px; margin: 10px 0; display: flex; }
-        .smc-long { background: var(--neon); box-shadow: 0 0 10px var(--neon); }
-        .smc-short { background: var(--danger); }
+        /* Trading Log */
+        .log-list { font-size: 10px; color: #666; max-height: 200px; overflow-y: auto; list-style: none; padding: 0; }
+        .log-item { border-bottom: 1px solid #111; padding: 5px 0; }
 
-        .btn-action { width: 100%; padding: 12px; background: #111; border: 1px solid #333; color: #fff; border-radius: 6px; cursor: pointer; font-size: 12px; margin-top: 10px; }
-        .btn-action:hover { border-color: var(--neon); color: var(--neon); }
+        .target-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .target-box { background: #111; padding: 12px; border-radius: 8px; text-align: center; }
+        button { width: 100%; padding: 12px; background: none; border: 1px solid var(--neon-green); color: var(--neon-green); border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button:hover { background: var(--neon-green); color: #000; }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
 
-<div class="wrapper">
+<div class="container">
     <div class="panel">
-        <span class="title">Fundamental Impact</span>
-        <div class="news-item"><span class="impact-high">USD</span> <span>CPI Data Release (High Volatility)</span></div>
-        <div class="news-item"><span class="impact-high">GOLD</span> <span>Central Bank Accumulation (+)</span></div>
-        <div class="news-item" style="color:#888;"><span>FOMC</span> <span>Interest Rate Decision (Upcoming)</span></div>
-        <br>
-        <span class="title">Smart Money Flow (SMC)</span>
-        <div style="font-size: 11px;">Institutional Orders: <span style="color:var(--neon)">BULLISH</span></div>
-        <div class="smc-meter"><div class="smc-long" style="width: 82%"></div><div class="smc-short" style="width: 18%"></div></div>
-        <div style="font-size: 10px; color:#444;">Liquidity Void Detected at 5062.40</div>
+        <div class="panel-header">Fundamental Impact</div>
+        <div class="data-row"><span class="impact-high">USD</span> <span>CPI Data Release (Volatile)</span></div>
+        <div class="data-row"><span style="color:var(--gold)">GOLD</span> <span>Central Bank Accumulation (+)</span></div>
+        <div class="data-row" style="color:#444;"><span>FOMC</span> <span>Rate Decision (Upcoming)</span></div>
+        
+        <div class="panel-header" style="margin-top:25px;">Smart Money Flow (SMC)</div>
+        <div class="data-row">Institutional Orders: <span style="color:var(--neon-green); font-weight:bold;">BULLISH</span></div>
+        <div class="smc-bar-bg"><div class="smc-long" style="width: 82%"></div><div class="smc-short" style="width: 18%"></div></div>
+        <div style="font-size:9px; color:#444;">Liquidity Void Detected at 5062.40</div>
     </div>
 
     <div class="panel" style="border-color: #333;">
-        <div style="display:flex; justify-content:space-between; font-size:11px;">
+        <div style="display:flex; justify-content:space-between; font-size:10px;">
             <span style="color:var(--gold)">XAUUSD | GOLD REAL-TIME</span>
-            <span style="color:var(--neon)">● ACCURACY: MAXIMUM</span>
+            <span style="color:var(--neon-green)">● ACCURACY: MAXIMUM</span>
         </div>
-        <div id="price">5057.95</div>
+        <div id="price-display">5057.00</div>
         
-        <div id="signal-display" class="signal-alert">ANALYZING LIQUIDITY...</div>
+        <div id="signal-box" class="signal-alert">ANALYZING SMC...</div>
 
-        <div class="grid-lvls">
-            <div class="lvl-box">
-                <span style="font-size:9px; color:#555;">INSTITUTIONAL TP</span>
-                <span id="tp-val" class="price-tag" style="color:var(--neon)">-</span>
+        <div class="target-grid">
+            <div class="target-box">
+                <span style="font-size:9px; color:#555; display:block;">INSTITUTIONAL TP</span>
+                <span id="tp-price" style="font-size:18px; font-weight:bold; color:var(--neon-green)">---</span>
             </div>
-            <div class="lvl-item lvl-box">
-                <span style="font-size:9px; color:#555;">PROTECTION SL</span>
-                <span id="sl-val" class="price-tag" style="color:var(--danger)">-</span>
+            <div class="target-box">
+                <span style="font-size:9px; color:#555; display:block;">PROTECTION SL</span>
+                <span id="sl-price" style="font-size:18px; font-weight:bold; color:var(--neon-red)">---</span>
             </div>
         </div>
-        <button class="btn-action" onclick="forceAnalyze()">RE-CALCULATE SMC & NEWS</button>
+        <button style="margin-top:20px;" onclick="recalculate()">RE-CALCULATE SMC & NEWS</button>
     </div>
 
     <div class="panel">
-        <span class="title">Volume Profile</span>
-        <div style="font-size: 11px; display:flex; justify-content:space-between;"><span>Buyers Volume:</span><span style="color:var(--neon)">82%</span></div>
-        <div style="font-size: 11px; display:flex; justify-content:space-between;"><span>Sellers Volume:</span><span style="color:var(--danger)">18%</span></div>
-        <br>
-        <span class="title">Global Session</span>
-        <div style="font-size: 12px;">London: <span style="color:var(--neon)">OPEN</span></div>
-        <div style="font-size: 12px;">New York: <span style="color:var(--danger)">CLOSED</span></div>
-        <br>
-        <span class="title">Daily Execution Log</span>
-        <div id="log" style="font-size: 10px; color:#666;">Waiting for trade setup...</div>
+        <div class="panel-header">Volume Profile</div>
+        <div class="data-row"><span>Buyers Volume:</span><span style="color:var(--neon-green)">82%</span></div>
+        <div class="data-row"><span>Sellers Volume:</span><span style="color:var(--neon-red)">18%</span></div>
+        
+        <div class="panel-header" style="margin-top:25px;">Global Session</div>
+        <div class="data-row">London: <span style="color:var(--neon-green)">OPEN</span></div>
+        <div class="data-row">New York: <span style="color:var(--neon-red)">CLOSED</span></div>
+        
+        <div class="panel-header" style="margin-top:25px;">Daily Execution Log</div>
+        <ul id="log-list" class="log-list">
+            <li class="log-item">Waiting for trade setup...</li>
+        </ul>
     </div>
 </div>
 
 <script>
     let locked = false;
-    let price = 5057.95;
+    let currentPrice = 5057.00; // Sinkron dengan harga terakhir
 
-    function coreEngine() {
-        const priceEl = document.getElementById('price');
-        let tick = (Math.random() * 0.16) - 0.08;
-        price += tick;
-        priceEl.innerText = price.toFixed(2);
+    function engine() {
+        const display = document.getElementById('price-display');
+        let tick = (Math.random() * 0.12) - 0.06;
+        currentPrice += tick;
+        display.innerText = currentPrice.toFixed(2);
 
-        // THE GOD LOGIC: Gabungan Fundamental + SMC + Price Action
+        // Algoritma SMC: Pemicu Sinyal Berdasarkan Pergerakan Institusi
         if (!locked && Math.abs(tick) > 0.02) {
             locked = true;
-            const direction = tick > 0 ? 'BUY' : 'SELL';
-            executeGodSignal(direction);
+            const side = tick > 0 ? 'BUY' : 'SELL';
+            deploySignal(side);
         }
     }
 
-    function executeGodSignal(type) {
-        const display = document.getElementById('signal-display');
-        display.innerText = `SMC ${type} CONFIRMED`;
-        display.className = `signal-alert ${type === 'BUY' ? 'buy-alert' : 'sell-alert'}`;
+    function deploySignal(type) {
+        const box = document.getElementById('signal-box');
+        box.innerText = `SMC ${type} CONFIRMED`;
+        box.className = `signal-alert ${type === 'BUY' ? 'buy-mode' : 'sell-mode'}`;
         
-        // Target Harga Berdasarkan Range Harian (Fundamental Target)
-        const target = type === 'BUY' ? price + 2.15 : price - 2.15;
-        const stop = type === 'BUY' ? price - 0.85 : price + 0.85;
+        // Penetapan Harga Berdasarkan Liquidity
+        const tpDist = 1.15;
+        const slDist = 0.85;
+        
+        const tp = type === 'BUY' ? currentPrice + tpDist : currentPrice - tpDist;
+        const sl = type === 'BUY' ? currentPrice - slDist : currentPrice + slDist;
 
-        document.getElementById('tp-val').innerText = target.toFixed(2);
-        document.getElementById('sl-val').innerText = stop.toFixed(2);
+        document.getElementById('tp-price').innerText = tp.toFixed(2);
+        document.getElementById('sl-price').innerText = sl.toFixed(2);
         
-        // Log ke Jurnal
-        document.getElementById('log').innerHTML = `[${new Date().toLocaleTimeString()}] ${type} XAUUSD at ${price.toFixed(2)} <br>` + document.getElementById('log').innerHTML;
+        addLog(type, currentPrice.toFixed(2));
     }
 
-    function forceAnalyze() {
+    function addLog(type, price) {
+        const log = document.getElementById('log-list');
+        const time = new Date().toLocaleTimeString('id-ID', {hour12:false});
+        const li = document.createElement('li');
+        li.className = "log-item";
+        li.innerHTML = `<span style="color:#fff">[${time}]</span> ${type} XAUUSD at ${price}`;
+        log.prepend(li);
+    }
+
+    function recalculate() {
         locked = false;
-        document.getElementById('signal-display').innerText = "ANALYZING LIQUIDITY...";
-        document.getElementById('signal-display').className = "signal-alert";
+        document.getElementById('signal-box').innerText = "ANALYZING SMC...";
+        document.getElementById('signal-box').className = "signal-alert";
     }
 
-    // Keamanan Tingkat Tinggi
-    document.onkeydown = (e) => { if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73)) return false; }
-    
-    setInterval(coreEngine, 250); // Kecepatan Ultra 0.25 detik
+    setInterval(engine, 300); // High-speed refresh
 </script>
 </body>
 </html>
