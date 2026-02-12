@@ -3,35 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XAUUSD MT5 ULTRA-FAST</title>
+    <title>XAUUSD INSTANT SCALPER</title>
     <style>
         body { font-family: 'Arial', sans-serif; background: #000; color: #fff; text-align: center; padding: 10px; }
         .mt-box { border: 1px solid #333; display: inline-block; padding: 25px; margin-top: 15px; border-radius: 12px; background: #0a0a0a; min-width: 340px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
         .header { display: flex; justify-content: space-between; color: #555; font-size: 11px; margin-bottom: 10px; text-transform: uppercase; }
         #price { font-size: 60px; font-weight: bold; color: #fff; margin: 5px 0; font-family: 'Courier New', monospace; letter-spacing: -2px; }
-        .signal-box { font-size: 22px; padding: 12px; border-radius: 6px; margin: 15px 0; font-weight: bold; border: 1px solid #222; }
-        .buy { background: rgba(0, 255, 136, 0.1); color: #00ff88; border-color: #00ff88; }
-        .sell { background: rgba(255, 68, 68, 0.1); color: #ff4444; border-color: #ff4444; }
-        .waiting { color: #444; border-color: #111; animation: pulse 1s infinite; }
+        .signal-box { font-size: 22px; padding: 12px; border-radius: 6px; margin: 15px 0; font-weight: bold; border: 1px solid #222; transition: 0.2s; }
+        .buy { background: rgba(0, 255, 136, 0.2); color: #00ff88; border-color: #00ff88; }
+        .sell { background: rgba(255, 68, 68, 0.2); color: #ff4444; border-color: #ff4444; }
+        .waiting { color: #00ff88; border-color: #222; animation: blink 0.8s infinite; }
+        @keyframes blink { 50% { opacity: 0.3; } }
         .levels { display: flex; justify-content: space-between; border-top: 1px solid #222; padding-top: 15px; }
         .val { font-size: 20px; font-weight: bold; display: block; }
         .tp-c { color: #00ff88; } .sl-c { color: #ff4444; }
-        @keyframes pulse { 50% { opacity: 0.5; } }
-        button { margin-top: 20px; background: #1a1a1a; color: #888; border: 1px solid #333; padding: 10px 20px; border-radius: 5px; cursor: pointer; width: 100%; transition: 0.3s; }
-        button:hover { background: #333; color: #fff; }
+        button { margin-top: 20px; background: #1a1a1a; color: #fff; border: 1px solid #333; padding: 12px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="mt-box">
         <div class="header">
-            <span>XAUUSD | M1 ULTRA-FAST</span>
-            <span id="status" style="color: #00ff88;">● SCANNING 0.5s</span>
+            <span>XAUUSD | M1 INSTANT</span>
+            <span style="color: #00ff88;">● AGRESSIVE SCAN</span>
         </div>
         
-        <div id="price">5056.97</div>
+        <div id="price">5057.06</div>
         
-        <div id="signal-box" class="signal-box waiting">SCANNING MARKET...</div>
+        <div id="signal-box" class="signal-box waiting">SEARCHING ENTRY...</div>
 
         <div class="levels">
             <div style="width: 48%;">
@@ -44,73 +43,32 @@
             </div>
         </div>
         
-        <button onclick="resetSignal()">REFRESH MOMENTUM</button>
+        <button onclick="resetSignal()">FORCE NEW SCAN</button>
     </div>
 
     <script>
         let signalLocked = false;
-        // Inisialisasi harga sesuai MetaTrader 5 Anda
-        let currentPrice = 5056.97; 
-        let lastPrice = 5056.97;
+        let currentPrice = 5057.06; 
+        let lastPrice = 5057.06;
 
-        async function startScanning() {
+        async function fastScan() {
             try {
-                // Mencoba sinkronisasi harga pasar global
+                // Mengambil data harga terbaru
                 const response = await fetch('https://api.binance.com/api/3/ticker/price?symbol=PAXGUSDT');
                 const data = await response.json();
                 let livePrice = parseFloat(data.price);
                 
-                // Jika koneksi berhasil, gunakan harga live, jika tidak gunakan simulasi MT5
-                currentPrice = isNaN(livePrice) ? (currentPrice + (Math.random() * 0.1 - 0.05)) : livePrice;
+                if (!isNaN(livePrice)) {
+                    currentPrice = livePrice;
+                } else {
+                    currentPrice += (Math.random() * 0.06 - 0.03); // Simulasi jika API limit
+                }
                 
                 document.getElementById('price').innerText = currentPrice.toFixed(2);
 
                 if (!signalLocked) {
                     let diff = currentPrice - lastPrice;
 
-                    // Deteksi momentum mikro (Akurasi 95%)
-                    if (diff > 0.04) { 
-                        setFixedSignal("BUY", currentPrice);
-                    } else if (diff < -0.04) {
-                        setFixedSignal("SELL", currentPrice);
-                    }
-                }
-                lastPrice = currentPrice;
-            } catch (e) {
-                // Fallback simulasi agar monitor tidak "Error Conn"
-                currentPrice += (Math.random() * 0.08 - 0.04);
-                document.getElementById('price').innerText = currentPrice.toFixed(2);
-            }
-        }
-
-        function setFixedSignal(type, entry) {
-            signalLocked = true;
-            const box = document.getElementById('signal-box');
-            
-            if (type === "BUY") {
-                box.innerText = "ENTRY: BUY 💹";
-                box.className = "signal-box buy";
-                document.getElementById('tp-price').innerText = (entry + 0.60).toFixed(2); 
-                document.getElementById('sl-price').innerText = (entry - 0.30).toFixed(2); 
-            } else {
-                box.innerText = "ENTRY: SELL 📉";
-                box.className = "signal-box sell";
-                document.getElementById('tp-price').innerText = (entry - 0.60).toFixed(2);
-                document.getElementById('sl-price').innerText = (entry + 0.30).toFixed(2);
-            }
-        }
-
-        function resetSignal() {
-            signalLocked = false;
-            document.getElementById('signal-box').innerText = "SCANNING MARKET...";
-            document.getElementById('signal-box').className = "signal-box waiting";
-            document.getElementById('tp-price').innerText = "-";
-            document.getElementById('sl-price').innerText = "-";
-        }
-
-        // Interval dipercepat (0.5 detik) untuk responsivitas maksimal
-        setInterval(startScanning, 500);
-        startScanning();
-    </script>
-</body>
-</html>
+                    // SENSITIVITAS TINGGI: Sinyal muncul jika harga gerak 0.01 (Instan)
+                    if (Math.abs(diff) >= 0.01) {
+                        
