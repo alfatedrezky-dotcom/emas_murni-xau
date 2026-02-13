@@ -2,117 +2,123 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SMC XT12 V13 - WHALE TRACKER</title>
+    <title>SMC GOD PROTOCOL V3.8 - NEWS ALERT</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd700; --green: #00ff88; --red: #ff3333; --bg: #000; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: sans-serif; height: 100vh; overflow: hidden; }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* Navigasi */
-        .nav { display: flex; height: 50px; background: #080808; border-bottom: 1px solid #222; }
-        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: bold; cursor: pointer; color: #444; }
-        .nav-item.active { color: var(--gold); border-bottom: 3px solid var(--gold); background: #111; }
+        /* News Ticker / Running Text */
+        .news-ticker { background: #b08d00; color: #000; height: 25px; display: flex; align-items: center; font-size: 11px; font-weight: bold; overflow: hidden; border-bottom: 1px solid #000; }
+        .ticker-wrap { width: 100%; overflow: hidden; white-space: nowrap; }
+        .ticker-move { display: inline-block; animation: ticker 30s linear infinite; }
+        @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
-        .view { display: none; height: calc(100vh - 50px); width: 100%; }
-        .view.active { display: block; }
-
-        /* Market Log */
-        .monitor { height: 160px; display: flex; background: #050505; border-top: 2px solid #1a1a1a; padding: 10px; gap: 8px; }
-        .card-p { flex: 1.2; border: 1px solid #222; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0a0a0a; }
-        .log-p { flex: 1.5; background: #080808; border-radius: 8px; padding: 8px; font-size: 8px; font-family: monospace; overflow-y: auto; color: #555; }
-
-        /* Finance */
-        .f-card { margin: 15px; padding: 20px; background: #0d0d0d; border: 1px solid #222; border-radius: 12px; }
-        input { width: 100%; padding: 12px; margin: 8px 0; background: #151515; border: 1px solid #333; color: #fff; border-radius: 5px; box-sizing: border-box; font-family: 'Orbitron'; font-size: 12px; }
-
-        /* Ticker */
-        .ticker { background: #1a1a1a; color: var(--gold); font-size: 9px; font-weight: bold; padding: 5px 0; border-bottom: 1px solid #222; }
+        .header-bar { height: 45px; background: #111; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid #222; justify-content: space-between; }
+        .main-container { display: flex; flex: 1; overflow: hidden; }
+        .chart-section { flex: 3; position: relative; border-right: 2px solid #1a1a1a; }
+        .news-section { flex: 1; background: #050505; min-width: 300px; display: flex; flex-direction: column; }
+        
+        /* Footer UI */
+        .footer { height: 160px; background: #050505; display: flex; padding: 10px; gap: 10px; border-top: 2px solid #1a1a1a; }
+        .price-card { flex: 1; background: #0a0a0a; border: 1px solid #333; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .log-terminal { flex: 2; background: #000; border: 1px solid #1a1a1a; padding: 10px; font-size: 11px; font-family: 'Courier New', monospace; color: var(--green); overflow-y: auto; }
+        
+        #price { font-size: 40px; color: var(--gold); font-family: 'Orbitron'; margin: 0; }
+        .test-btn { padding: 6px 12px; background: var(--gold); border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 10px; }
+        
+        /* Flash Animations */
+        .flash-buy { box-shadow: inset 0 0 80px #00ff8855; transition: 0.3s; }
+        .flash-sell { box-shadow: inset 0 0 80px #ff333355; transition: 0.3s; }
     </style>
 </head>
-<body>
+<body id="body-main">
 
-<div class="nav">
-    <div class="nav-item active" onclick="tab('market')">WHALE MONITOR</div>
-    <div class="nav-item" onclick="tab('finance')">PROFIT & RISK</div>
-    <div class="nav-item" onclick="tab('news')">ECONOMY NEWS</div>
+<div class="news-ticker">
+    <div class="ticker-wrap">
+        <div class="ticker-move" id="ticker-text">
+            WARNING: HIGH IMPACT NEWS AHEAD (CPI, NFP, FOMC) - ALWAYS CHECK THE ECONOMIC CALENDAR BEFORE TRADING - VOLATILITY MAY INCREASE - TRADE RESPONSIBLY...
+        </div>
+    </div>
 </div>
 
-<div id="market" class="view active">
-    <div style="height: calc(100% - 160px);">
+<div class="header-bar">
+    <div style="font-family: 'Orbitron'; font-size: 14px; color: var(--gold);">SMC GOD PROTOCOL <span style="font-size: 10px; color: #666;">V3.8</span></div>
+    <div style="display: flex; align-items: center;">
+        <div id="session-info" style="font-size: 10px; color: var(--gold); padding: 3px 8px; border: 1px solid #333; border-radius: 4px;">SYNCING...</div>
+        <button class="test-btn" style="margin-left: 15px;" onclick="testSound()">TEST ALARM</button>
+    </div>
+</div>
+
+<div class="main-container">
+    <div class="chart-section" id="chart-area">
         <iframe src="https://s.tradingview.com/widgetembed/?symbol=OANDA%3AXAUUSD&interval=1&theme=dark" style="width:100%; height:100%; border:none;"></iframe>
     </div>
-    <div class="monitor">
-        <div class="card-p">
-            <div id="price" style="font-size: 32px; color: var(--gold); font-family: 'Orbitron';">0.00</div>
-            <div id="signal" style="font-size: 9px; font-weight: bold; margin-top: 5px; text-align: center; color: #666;">SCANNING WHALES...</div>
-        </div>
-        <div class="log-p" id="log"></div>
+    <div class="news-section">
+        <div style="padding: 10px; font-size: 11px; background: #111; color: var(--gold); font-weight: bold;">LIVE MARKET DATA</div>
+        <iframe id="news-iframe" src="https://www.widgets.investing.com/live-currency-cross-rates?theme=darkTheme&pairs=1" width="100%" height="100%" frameborder="0" allowtransparency="true"></iframe>
     </div>
 </div>
 
-<div id="finance" class="view">
-    <div class="f-card">
-        <h3 style="color:var(--gold); font-size:11px; margin:0 0 10px 0;">INSTITUTIONAL LOT CALCULATOR</h3>
-        <input type="number" id="lot" placeholder="Lot Size" oninput="calc()">
-        <input type="number" id="pips" placeholder="Target Pips" oninput="calc()">
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
-            <div style="border:1px solid var(--green); padding:10px; border-radius:8px; text-align:center;">
-                <div style="font-size:8px; color: #555;">PROFIT (USD)</div>
-                <div id="res_p" style="color:var(--green); font-size:18px; font-family:'Orbitron';">$0.00</div>
-            </div>
-            <div style="border:1px solid var(--red); padding:10px; border-radius:8px; text-align:center;">
-                <div style="font-size:8px; color: #555;">RISK (USD)</div>
-                <div id="res_l" style="color:var(--red); font-size:18px; font-family:'Orbitron';">-$0.00</div>
-            </div>
-        </div>
+<div class="footer">
+    <div class="price-card" id="card-main">
+        <div id="bias-val" style="font-size: 10px; letter-spacing: 2px; margin-bottom: 5px;">CONNECTING...</div>
+        <div id="price">0.00</div>
+        <div id="signal" style="margin-top:5px; font-weight:bold; font-size: 13px; color: #555;">WAITING DATA</div>
+        <div id="timer" style="position: absolute; bottom: 8px; right: 12px; font-size: 10px; color: var(--gold); font-family: 'Orbitron';">00s</div>
     </div>
-</div>
-
-<div id="news" class="view">
-    <div class="ticker"><marquee>LIVE FUNDAMENTAL: 🟢 NFP FORECAST | 🔴 CPI (YoY) | 🟡 FED RATE DECISION | 🔵 USD INDEX DELTA</marquee></div>
-    <iframe src="https://www.tradingview-widget.com/embed-widget/events/?colorTheme=dark&importanceFilter=0,1&currencyFilter=USD" style="width:100%; height:calc(100% - 25px); border:none;"></iframe>
+    <div class="log-terminal" id="log"></div>
 </div>
 
 <script>
     const firebaseConfig = { databaseURL: "https://emas-murni-xau-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const alertSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-sci-fi-confirmation-914.mp3');
+
+    const audioBuy = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+    const audioSell = new Audio('https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg');
+
+    function testSound() { audioBuy.play(); alert("Sistem Audio & News Alert Aktif!"); }
+
+    // Session Tracker
+    function updateSession() {
+        const hour = new Date().getUTCHours();
+        let session = "ASIA SESSION";
+        if (hour >= 7 && hour < 16) session = "LONDON SESSION 🇬🇧";
+        if (hour >= 13 && hour < 22) session = "NEW YORK SESSION 🇺🇸";
+        document.getElementById('session-info').innerText = session;
+    }
+    setInterval(updateSession, 60000); updateSession();
 
     db.ref('live_monitor').on('value', (s) => {
         const d = s.val(); if(!d) return;
         document.getElementById('price').innerText = d.price.toFixed(2);
         document.getElementById('signal').innerText = d.prediction;
+        document.getElementById('bias-val').innerText = "BIAS: " + d.bias;
+        document.getElementById('bias-val').style.color = d.bias === "BULLISH" ? "var(--green)" : "var(--red)";
         
         const log = document.getElementById('log');
         log.innerHTML = `<div>[${d.time}] ${d.prediction}</div>` + log.innerHTML;
-        if(log.children.length > 15) log.removeChild(log.lastChild);
+        if(log.children.length > 10) log.removeChild(log.lastChild);
         
-        if(d.prediction.includes("GOD") || d.prediction.includes("WHALE")) {
-            document.getElementById('signal').style.color = d.prediction.includes("BUY") ? "var(--green)" : "var(--red)";
-            alertSound.play().catch(() => {});
-        } else {
-            document.getElementById('signal').style.color = "white";
+        const chartArea = document.getElementById('chart-area');
+        chartArea.className = "chart-section";
+
+        if(d.prediction.includes("GOD BUY")) {
+            audioBuy.play();
+            chartArea.classList.add("flash-buy");
+        } else if(d.prediction.includes("GOD SELL")) {
+            audioSell.play();
+            chartArea.classList.add("flash-sell");
         }
     });
 
-    function calc() {
-        const l = document.getElementById('lot').value || 0;
-        const p = document.getElementById('pips').value || 0;
-        const profit = l * p * 10;
-        document.getElementById('res_p').innerText = "$" + profit.toFixed(2);
-        document.getElementById('res_l').innerText = "-$" + (profit * 1.5).toFixed(2);
-    }
-
-    function tab(id) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        event.currentTarget.classList.add('active');
-    }
+    setInterval(() => {
+        const seconds = 60 - new Date().getSeconds();
+        document.getElementById('timer').innerText = (seconds < 10 ? "0" : "") + seconds + "s";
+    }, 1000);
 </script>
 </body>
 </html>
