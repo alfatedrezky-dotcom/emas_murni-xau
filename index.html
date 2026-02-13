@@ -2,79 +2,129 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>SMC ULTRA-PRECISION | FIXED</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMC ULTRA-PRECISION TERMINAL</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 10px; overflow: hidden; }
-        .grid { display: grid; grid-template-columns: 280px 1fr 280px; gap: 10px; height: 95vh; }
-        .panel { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 8px; padding: 15px; display: flex; flex-direction: column; }
-        #price { font-size: 45px; font-weight: bold; text-align: center; color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
-        .sig-box { padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; border: 1px solid #333; margin: 10px 0; }
-        .buy { border-color: #00ff88; color: #00ff88; background: rgba(0,255,136,0.1); }
-        .sell { border-color: #ff4444; color: #ff4444; background: rgba(255,68,68,0.1); }
-        .scroll { flex-grow: 1; overflow-y: auto; font-size: 11px; border-top: 1px solid #222; margin-top: 10px; }
+        :root { --bg: #050505; --panel: #111; --gold: #ffd700; --buy: #00ff88; --sell: #ff4444; }
+        body { background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
+        .dashboard { display: grid; grid-template-columns: 300px 1fr 300px; gap: 15px; height: 95vh; }
+        .panel { background: var(--panel); border: 1px solid #222; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        /* Price Display */
+        #price { font-size: 56px; font-weight: 800; text-align: center; color: var(--gold); letter-spacing: -2px; margin: 10px 0; transition: 0.3s; }
+        .price-up { color: var(--buy) !important; text-shadow: 0 0 20px rgba(0,255,136,0.4); }
+        .price-down { color: var(--sell) !important; text-shadow: 0 0 20px rgba(255,68,68,0.4); }
+
+        /* Signal Box */
+        .signal-card { padding: 15px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 18px; border: 1px solid #333; margin-bottom: 20px; text-transform: uppercase; }
+        .sig-buy { background: rgba(0,255,136,0.1); border-color: var(--buy); color: var(--buy); }
+        .sig-sell { background: rgba(255,68,68,0.1); border-color: var(--sell); color: var(--sell); }
+
+        /* Ledger & Log */
+        .scroll-area { flex-grow: 1; overflow-y: auto; font-size: 12px; padding-right: 5px; }
+        .log-item { padding: 8px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
+        .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        
+        input, button { width: 100%; padding: 12px; margin: 5px 0; border-radius: 6px; border: none; font-weight: bold; }
+        input { background: #1a1a1a; color: #fff; border: 1px solid #333; }
+        .btn-in { background: var(--buy); color: #000; }
+        .btn-out { background: var(--sell); color: #fff; }
     </style>
 </head>
 <body>
-<div class="grid">
+
+<div class="dashboard">
     <div class="panel">
-        <h2 id="balance">Rp 0</h2>
-        <div id="hist" class="scroll"></div>
+        <h3 style="color: var(--gold); margin-top: 0;">FINANCE LEDGER</h3>
+        <h2 id="balance" style="font-size: 28px; margin: 10px 0;">Rp 0</h2>
+        <input type="text" id="desc" placeholder="Keterangan Transaksi">
+        <input type="number" id="amt" placeholder="Jumlah (Rp)">
+        <button class="btn-in" onclick="addTx('IN')">DEPOSIT (+)</button>
+        <button class="btn-out" onclick="addTx('OUT')">WITHDRAW (-)</button>
+        <div class="scroll-area" id="tx-hist" style="margin-top: 15px;"></div>
     </div>
-    <div class="panel">
-        <div id="price">LOADING...</div>
-        <div id="sig" class="sig-box">WAITING FOR TERMUX...</div>
-        <div id="chart" style="height: 400px;"></div>
+
+    <div class="panel" style="justify-content: center;">
+        <div style="text-align: center; color: #666; font-size: 12px; letter-spacing: 2px;">XAU/USD LIVE TRACKER</div>
+        <div id="price">0000.00</div>
+        <div id="signal-box" class="signal-card">INITIALIZING ENGINE...</div>
+        <div style="height: 300px; border: 1px dashed #333; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #444;">
+            [ CHART AREA - READY ]
+        </div>
     </div>
+
     <div class="panel">
-        <div id="log" class="scroll"></div>
+        <h3 style="color: var(--gold); margin-top: 0;">SIGNAL & NEWS LOG</h3>
+        <div class="scroll-area" id="news-log">
+            <div class="log-item" style="color: var(--buy);">[SYSTEM] Engine Connected</div>
+        </div>
     </div>
 </div>
 
 <script>
-    // Konfigurasi Database Anda
-    const conf = { databaseURL: "https://emas_murni-xau-default-rtdb.firebaseio.com" };
+    // Konfigurasi Database Sesuai Foto Kamu
+    const conf = { databaseURL: "https://emas-murni-xau-default-rtdb.firebaseio.com" };
     firebase.initializeApp(conf);
     const db = firebase.database();
 
-    const chart = LightweightCharts.createChart(document.getElementById('chart'), {
-        layout: { backgroundColor: '#0a0a0a', textColor: '#d1d4dc' },
-        grid: { vertLines: { color: '#111' }, horzLines: { color: '#111' } }
-    });
-    const candle = chart.addCandlestickSeries({ upColor: '#00ff88', downColor: '#ff4444' });
-    let lastP = 0;
+    let lastPrice = 0;
+    let records = JSON.parse(localStorage.getItem('smc_finance')) || [];
 
-    // Perbaikan Listener: Membaca folder 'live_monitor' ATAU 'root'
-    db.ref('/').on('value', (s) => {
-        const root = s.val();
-        // Cek apakah data ada di dalam 'live_monitor' atau langsung di root
-        const val = root.live_monitor ? root.live_monitor : root;
+    // Main Price Listener
+    db.ref('live_monitor').on('value', (snap) => {
+        const data = snap.val();
+        if(!data || !data.price) return;
+
+        const p = data.price;
+        const priceEl = document.getElementById('price');
+        const sigEl = document.getElementById('signal-box');
         
-        if(!val || !val.price) {
-            document.getElementById('sig').innerText = "DATABASE EMPTY / WRONG PATH";
-            return;
+        // Update Price & Animation
+        priceEl.innerText = p.toFixed(2);
+        priceEl.className = p > lastPrice ? 'price-up' : 'price-down';
+
+        // Signal Logic (Accurate Momentum)
+        if(lastPrice > 0 && p !== lastPrice) {
+            const side = p > lastPrice ? 'BUY' : 'SELL';
+            sigEl.innerText = side + " MOMENTUM CONFIRMED";
+            sigEl.className = "signal-card " + (side === 'BUY' ? 'sig-buy' : 'sig-sell');
+            
+            // Log Signal as News
+            addLog(side, p);
         }
 
-        const p = parseFloat(val.price);
-        document.getElementById('price').innerText = p.toFixed(2);
-        document.getElementById('price').style.color = p > lastP ? '#00ff88' : '#ff4444';
-
-        if(lastP > 0 && p !== lastP) {
-            const side = p > lastP ? 'BUY' : 'SELL';
-            const sigEl = document.getElementById('sig');
-            sigEl.innerText = side + " CONFIRMED";
-            sigEl.className = "sig-box " + side.toLowerCase();
-            document.getElementById('log').innerHTML = "<div>[" + new Date().toLocaleTimeString() + "] " + side + " @ " + p + "</div>" + document.getElementById('log').innerHTML;
-        }
-
-        candle.update({ 
-            time: val.timestamp ? Math.floor(val.timestamp) : Math.floor(Date.now()/1000), 
-            open: p, high: p, low: p, close: p 
-        });
-        lastP = p;
+        lastPrice = p;
     });
+
+    function addLog(side, price) {
+        const log = document.getElementById('news-log');
+        const time = new Date().toLocaleTimeString();
+        const color = side === 'BUY' ? '#00ff88' : '#ff4444';
+        log.innerHTML = `<div class="log-item"><span style="color:${color}">[${side}]</span> <span>$${price}</span> <span style="color:#666">${time}</span></div>` + log.innerHTML;
+    }
+
+    function addTx(type) {
+        const d = document.getElementById('desc').value;
+        const a = parseFloat(document.getElementById('amt').value);
+        if(!d || isNaN(a)) return;
+        records.push({ d, a, type, t: new Date().toLocaleString() });
+        localStorage.setItem('smc_finance', JSON.stringify(records));
+        renderFin();
+    }
+
+    function renderFin() {
+        let total = 0;
+        const h = document.getElementById('tx-hist');
+        h.innerHTML = '';
+        records.forEach(i => {
+            total += (i.type === 'IN' ? i.a : -i.a);
+            h.innerHTML = `<div class="log-item"><span>${i.d}</span> <span style="color:${i.type=='IN'?'#00ff88':'#ff4444'}">Rp ${i.a.toLocaleString()}</span></div>` + h.innerHTML;
+        });
+        document.getElementById('balance').innerText = "Rp " + total.toLocaleString();
+    }
+    renderFin();
 </script>
 </body>
 </html>
