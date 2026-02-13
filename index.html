@@ -1,45 +1,103 @@
-// Konfigurasi Database sesuai data Termux
-const firebaseConfig = { 
-    databaseURL: "https://emas_murni-xau-default-rtdb.firebaseio.com" 
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>SMC ULTRA-PRECISION | LIVE</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 10px; overflow: hidden; }
+        .grid { display: grid; grid-template-columns: 280px 1fr 280px; gap: 10px; height: 95vh; }
+        .panel { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 8px; padding: 15px; display: flex; flex-direction: column; }
+        #price { font-size: 45px; font-weight: bold; text-align: center; color: #ffd700; }
+        .sig-box { padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; border: 1px solid #333; margin: 10px 0; }
+        .buy { border-color: #00ff88; color: #00ff88; background: rgba(0,255,136,0.1); }
+        .sell { border-color: #ff4444; color: #ff4444; background: rgba(255,68,68,0.1); }
+        input { background: #111; border: 1px solid #333; color: #fff; padding: 10px; margin-bottom: 5px; width: 100%; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        .scroll { flex-grow: 1; overflow-y: auto; font-size: 11px; border-top: 1px solid #222; margin-top: 10px; }
+    </style>
+</head>
+<body>
 
-// Inisialisasi Chart Candlestick
-const chart = LightweightCharts.createChart(document.getElementById('chart'), {
-    layout: { backgroundColor: '#0d0d0d', textColor: '#d1d4dc' },
-    grid: { vertLines: { color: '#1a1a1a' }, horzLines: { color: '#1a1a1a' } }
-});
-const candleSeries = chart.addCandlestickSeries({ upColor: '#00ff88', downColor: '#ff4444' });
+<div class="grid">
+    <div class="panel">
+        <div style="color:#ffd700; font-size: 10px;">FINANCE LEDGER</div>
+        <h2 id="balance">Rp 0</h2>
+        <input type="text" id="desc" placeholder="Keterangan">
+        <input type="number" id="amt" placeholder="Jumlah (Rp)">
+        <button onclick="addTrans('IN')" style="background:#00ff88; color:#000; margin-bottom:5px;">INCOME (+)</button>
+        <button onclick="addTrans('OUT')" style="background:#ff4444; color:#fff;">EXPENSE (-)</button>
+        <div id="hist" class="scroll"></div>
+    </div>
 
-let lastPrice = 0;
+    <div class="panel">
+        <div id="price">0000.00</div>
+        <div id="sig" class="sig-box">WAITING FOR TERMUX...</div>
+        <div id="chart" style="height: 400px;"></div>
+    </div>
 
-// Listener Real-Time
-db.ref('live_monitor').on('value', (snapshot) => {
-    const data = snapshot.val();
-    if (data && data.price) {
-        const p = data.price;
-        const ts = Math.floor(data.timestamp);
+    <div class="panel">
+        <div style="color:#ffd700; font-size: 10px;">SIGNAL ENGINE LOG</div>
+        <div id="log" class="scroll"></div>
+    </div>
+</div>
 
-        // Update Tampilan Harga
-        const priceEl = document.getElementById('price');
-        priceEl.innerText = p.toFixed(2);
-        priceEl.style.color = p > lastPrice ? '#00ff88' : '#ff4444';
+<script>
+    const conf = { databaseURL: "https://emas_murni-xau-default-rtdb.firebaseio.com" };
+    firebase.initializeApp(conf);
+    const db = firebase.database();
 
-        // Update Sinyal BUY/SELL jika harga berubah
-        if (lastPrice > 0 && p !== lastPrice) {
-            const side = p > lastPrice ? 'BUY' : 'SELL';
-            const sigBox = document.getElementById('signal');
-            sigBox.innerText = side + " CONFIRMED";
-            sigBox.className = "signal-box " + side.toLowerCase();
-            
-            // Log Sinyal ke Panel
-            const logEl = document.getElementById('log');
-            logEl.innerHTML = "<div>[" + new Date().toLocaleTimeString() + "] " + side + " @ " + p + "</div>" + logEl.innerHTML;
+    const chart = LightweightCharts.createChart(document.getElementById('chart'), {
+        layout: { backgroundColor: '#0a0a0a', textColor: '#d1d4dc' },
+        grid: { vertLines: { color: '#111' }, horzLines: { color: '#111' } }
+    });
+    const candle = chart.addCandlestickSeries({ upColor: '#00ff88', downColor: '#ff4444' });
+
+    let lastP = 0;
+    let records = JSON.parse(localStorage.getItem('fin_v10')) || [];
+
+    db.ref('live_monitor').on('value', (s) => {
+        const val = s.val();
+        if(!val || !val.price) return;
+        const p = val.price;
+        
+        document.getElementById('price').innerText = p.toFixed(2);
+        document.getElementById('price').style.color = p > lastP ? '#00ff88' : '#ff4444';
+
+        if(lastP > 0 && p !== lastP) {
+            const side = p > lastP ? 'BUY' : 'SELL';
+            const sigEl = document.getElementById('sig');
+            sigEl.innerText = side + " CONFIRMED";
+            sigEl.className = "sig-box " + side.toLowerCase();
+            document.getElementById('log').innerHTML = "<div>[" + new Date().toLocaleTimeString() + "] " + side + " @ " + p + "</div>" + document.getElementById('log').innerHTML;
         }
 
-        // Gambar pergerakan grafik
-        candleSeries.update({ time: ts, open: p, high: p, low: p, close: p });
-        lastPrice = p;
+        candle.update({ time: Math.floor(val.timestamp), open: p, high: p, low: p, close: p });
+        lastP = p;
+    });
+
+    function addTrans(type) {
+        const d = document.getElementById('desc').value;
+        const a = parseFloat(document.getElementById('amt').value);
+        if(!d || isNaN(a)) return;
+        records.push({ d, a, type, time: new Date().toLocaleString() });
+        localStorage.setItem('fin_v10', JSON.stringify(records));
+        render();
     }
-});
+
+    function render() {
+        let total = 0;
+        const h = document.getElementById('hist');
+        h.innerHTML = '';
+        records.forEach(i => {
+            total += (i.type === 'IN' ? i.a : -i.a);
+            h.innerHTML = "<div>" + i.d + ": Rp " + i.a.toLocaleString() + " (" + i.type + ")</div>" + h.innerHTML;
+        });
+        document.getElementById('balance').innerText = "Rp " + total.toLocaleString();
+    }
+    render();
+</script>
+</body>
+</html>
