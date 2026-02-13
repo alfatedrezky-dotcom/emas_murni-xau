@@ -26,7 +26,7 @@ db.ref('live_monitor').on('value', (snapshot) => {
         priceEl.innerText = p.toFixed(2);
         priceEl.style.color = p > lastPrice ? '#00ff88' : '#ff4444';
 
-        // Update Sinyal BUY/SELL
+        // Update Sinyal BUY/SELL jika harga berubah
         if (lastPrice > 0 && p !== lastPrice) {
             const side = p > lastPrice ? 'BUY' : 'SELL';
             const sigBox = document.getElementById('signal');
@@ -35,7 +35,7 @@ db.ref('live_monitor').on('value', (snapshot) => {
             
             // Log Sinyal ke Panel
             const logEl = document.getElementById('log');
-            logEl.innerHTML = `<div>[${new Date().toLocaleTimeString()}] ${side} @ ${p}</div>` + logEl.innerHTML;
+            logEl.innerHTML = "<div>[" + new Date().toLocaleTimeString() + "] " + side + " @ " + p + "</div>" + logEl.innerHTML;
         }
 
         // Gambar pergerakan grafik
