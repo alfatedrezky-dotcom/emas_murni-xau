@@ -3,149 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SMC XT12 GOD TERMINAL V9 - ULTIMATE</title>
+    <title>SMC XT12 GOD V10 - ULTIMATE</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #ffd700; --bg: #000; --panel: #0a0a0a; --green: #00ff88; --red: #ff3333; }
-        body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; height: 100vh; width: 100vw; overflow: hidden; }
+        :root { --gold: #ffd700; --bg: #000; --panel: #0d0d0d; --green: #00ff88; --red: #ff3333; }
+        body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; }
 
         /* Navigasi */
-        .nav-bar { display: flex; height: 50px; background: #050505; border-bottom: 1px solid #222; position: relative; z-index: 1000; }
-        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; color: #555; font-size: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
-        .nav-item.active { color: var(--gold); background: #111; border-bottom: 3px solid var(--gold); }
+        .nav-bar { display: flex; height: 50px; background: #050505; border-bottom: 1px solid #222; }
+        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; color: #555; font-size: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .nav-item.active { color: var(--gold); border-bottom: 3px solid var(--gold); background: #111; }
 
-        .content-container { height: calc(100vh - 50px); width: 100%; position: relative; }
-        .tab-content { display: none; height: 100%; width: 100%; }
-        .tab-content.active { display: block; }
+        .content { height: calc(100vh - 50px); width: 100%; position: relative; }
+        .page { display: none; height: 100%; width: 100%; overflow-y: auto; }
+        .page.active { display: block; }
 
-        /* Market Layout: Dual Chart */
-        .market-layout { display: flex; flex-direction: column; height: 100%; }
-        .charts-container { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-        .main-chart { flex: 1.5; border-bottom: 1px solid #1a1a1a; }
-        .mini-chart { flex: 0.8; border-bottom: 2px solid #1a1a1a; }
-
-        /* Bottom Panel: Data & Log */
-        .bottom-panel { height: 170px; background: #050505; display: flex; padding: 8px; gap: 8px; }
-        .card { background: var(--panel); border: 1px solid #222; border-radius: 6px; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
+        /* Finance Section - Kalkulator Pro */
+        .finance-card { padding: 20px; background: var(--panel); border-radius: 12px; margin: 15px; border: 1px solid #222; }
+        .input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        input { background: #151515; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 5px; outline: none; font-family: 'Orbitron'; }
+        .calc-btn { background: var(--gold); color: #000; border: none; padding: 15px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .res-box { padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #222; }
         
-        .price-card { flex: 1.5; position: relative; }
-        #price-display { font-family: 'Orbitron'; font-size: 36px; color: var(--gold); margin: 0; }
-        #ny-countdown { font-family: 'Orbitron'; font-size: 10px; color: #666; margin-top: 4px; }
-        #signal-text { font-family: 'Orbitron'; font-size: 11px; margin-top: 8px; font-weight: bold; }
-
-        /* Institutional Log Style */
-        .log-card { flex: 1.2; padding: 8px; align-items: flex-start; }
-        #signal-log { width: 100%; height: 100%; overflow-y: auto; font-size: 9px; font-family: monospace; }
-        .log-row { display: flex; justify-content: space-between; border-bottom: 1px solid #111; padding: 3px 0; width: 100%; }
-        .log-time { color: #444; margin-right: 8px; }
-        .log-msg { color: #888; font-weight: bold; text-align: right; flex: 1; }
-
-        /* Iframe Full View Fix */
-        iframe { width: 100%; height: 100%; border: none; display: block; margin: 0; padding: 0; }
+        /* Market Log & Price */
+        .market-layout { display: flex; flex-direction: column; height: 100%; }
+        .bottom-info { height: 180px; display: flex; gap: 10px; padding: 10px; background: #050505; border-top: 2px solid #1a1a1a; }
+        .log-area { flex: 1.2; background: #080808; border-radius: 8px; padding: 10px; font-size: 9px; overflow-y: auto; font-family: monospace; }
+        .price-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0a0a0a; border-radius: 8px; border: 1px solid #222; }
     </style>
 </head>
 <body>
 
 <div class="nav-bar">
-    <div class="nav-item active" onclick="openTab('market')">GOD TERMINAL</div>
-    <div class="nav-item" onclick="openTab('finance')">FINANCE & RISK</div>
-    <div class="nav-item" onclick="openTab('news')">ECONOMY NEWS</div>
+    <div class="nav-item active" onclick="tab('market')">GOD TERMINAL</div>
+    <div class="nav-item" onclick="tab('finance')">FINANCE & RISK</div>
+    <div class="nav-item" onclick="tab('news')">ECONOMY NEWS</div>
 </div>
 
-<div class="content-container">
-    <div id="market" class="tab-content active">
+<div class="content">
+    <div id="market" class="page active">
         <div class="market-layout">
-            <div class="charts-container">
-                <div id="tv_main_m1" class="main-chart"></div>
-                <div id="tv_mini_h1" class="mini-chart"></div>
-            </div>
-            <div class="bottom-panel">
-                <div class="card price-card">
-                    <div id="price-display">0.00</div>
-                    <div id="ny-countdown">NY OPENS IN: --:--:--</div>
-                    <div id="signal-text">SYSTEM STANDBY</div>
+            <div id="tv_chart" style="flex:1;"></div>
+            <div class="bottom-info">
+                <div class="price-area">
+                    <div id="price-display" style="font-size:38px; color:var(--gold); font-family:'Orbitron';">0.00</div>
+                    <div id="signal-text" style="font-size:10px; margin-top:5px; font-weight:bold;">SCANNING...</div>
                 </div>
-                <div class="card log-card">
-                    <div style="font-size: 8px; color: var(--gold); margin-bottom: 5px; font-weight: bold; text-transform: uppercase;">Institutional Log (History)</div>
-                    <div id="signal-log">
-                        </div>
+                <div class="log-area" id="signal-log"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="finance" class="page">
+        <div class="finance-card">
+            <h3 style="color:var(--gold); font-size:12px; margin-bottom:20px;">XAU/USD RISK CALCULATOR</h3>
+            <div class="input-group">
+                <input type="number" id="lot" placeholder="Lot Size (e.g 0.10)">
+                <input type="number" id="entry" placeholder="Entry Price">
+            </div>
+            <div class="input-group">
+                <input type="number" id="exit" placeholder="Exit/TP Price">
+                <input type="number" id="sl" placeholder="Stop Loss Price">
+            </div>
+            <button class="calc-btn" onclick="calculateRisk()">CALCULATE PROFIT/LOSS</button>
+            
+            <div class="result-grid">
+                <div class="res-box" style="border-color:var(--green);">
+                    <div style="font-size:9px; color:#555;">PROFIT ESTIMATE</div>
+                    <div id="prof-res" style="font-size:18px; color:var(--green); font-family:'Orbitron';">$0.00</div>
+                </div>
+                <div class="res-box" style="border-color:var(--red);">
+                    <div style="font-size:9px; color:#555;">RISK (SL)</div>
+                    <div id="risk-res" style="font-size:18px; color:var(--red); font-family:'Orbitron';">$0.00</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="finance" class="tab-content">
-        <iframe src="https://alfatedrezky-dotcom.github.io/emas_murni-xau/"></iframe>
-    </div>
-
-    <div id="news" class="tab-content">
-        <iframe src="https://www.tradingview-widget.com/embed-widget/events/?colorTheme=dark&isTransparent=false&width=100%&height=100%&locale=id&importanceFilter=-1,0,1&currencyFilter=USD"></iframe>
+    <div id="news" class="page">
+        <div class="tradingview-widget-container" style="height:100%;">
+            <iframe src="https://www.tradingview-widget.com/embed-widget/events/?colorTheme=dark&isTransparent=false&width=100%&height=100%&locale=id&importanceFilter=-1,0,1&currencyFilter=USD" style="width:100%; height:100%; border:none;"></iframe>
+        </div>
     </div>
 </div>
 
 <script src="https://s3.tradingview.com/tv.js"></script>
 <script>
-    // 1. Inisialisasi Dual Chart (M1 & H1)
-    new TradingView.widget({ "autosize": true, "symbol": "OANDA:XAUUSD", "interval": "1", "theme": "dark", "container_id": "tv_main_m1", "hide_side_toolbar": false });
-    new TradingView.widget({ "autosize": true, "symbol": "OANDA:XAUUSD", "interval": "60", "theme": "dark", "container_id": "tv_mini_h1", "hide_top_toolbar": true });
+    new TradingView.widget({ "autosize": true, "symbol": "OANDA:XAUUSD", "interval": "1", "theme": "dark", "container_id": "tv_chart" });
 
-    // 2. Firebase Sync & Log Logic
+    // Firebase Sync
     const config = { databaseURL: "https://emas-murni-xau-default-rtdb.firebaseio.com" };
     firebase.initializeApp(config);
     const db = firebase.database();
-    const alertSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-urgent-simple-beep-2266.mp3');
 
-    db.ref('live_monitor').on('value', (snapshot) => {
-        const d = snapshot.val(); if(!d) return;
-        
-        // Update Harga & Sinyal Utama
+    db.ref('live_monitor').on('value', (s) => {
+        const d = s.val(); if(!d) return;
         document.getElementById('price-display').innerText = d.price.toFixed(2);
-        const sigEl = document.getElementById('signal-text');
-        sigEl.innerText = d.prediction;
-
-        // Smart Log System (History)
-        const logContainer = document.getElementById('signal-log');
-        const row = document.createElement('div');
-        row.className = 'log-row';
-        row.innerHTML = `<span class="log-time">${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'})}</span> 
-                         <span class="log-msg">${d.prediction}</span>`;
-        logContainer.prepend(row);
+        document.getElementById('signal-text').innerText = d.prediction;
         
-        // Batasi history maksimal 15 baris
-        if(logContainer.children.length > 15) logContainer.removeChild(logContainer.lastChild);
-
-        // God Alert & Glow Effect
-        if(d.prediction.includes("GOD")) {
-            const isBuy = d.prediction.includes("BUY");
-            sigEl.style.color = isBuy ? "var(--green)" : "var(--red)";
-            sigEl.style.textShadow = `0 0 15px ${isBuy ? "rgba(0,255,136,0.8)" : "rgba(255,51,51,0.8)"}`;
-            alertSound.play().catch(e => console.log("Audio play deferred"));
-        } else {
-            sigEl.style.color = "#ffd700";
-            sigEl.style.textShadow = "none";
-        }
+        // Log System
+        const log = document.getElementById('signal-log');
+        const row = `<div style="border-bottom:1px solid #111; padding:2px 0; color:#555;">
+                        <span style="color:var(--gold)">[${new Date().toLocaleTimeString()}]</span> ${d.prediction}
+                     </div>`;
+        log.innerHTML = row + log.innerHTML;
+        if(log.children.length > 12) log.removeChild(log.lastChild);
     });
 
-    // 3. New York Session Countdown Timer
-    setInterval(() => {
-        const now = new Date();
-        const nyTime = new Date();
-        nyTime.setHours(20, 21, 0); // Target pembukaan NY (pukul 20:21 WIB)
-        
-        let diff = nyTime - now;
-        if(diff < 0) diff += 86400000; // Reset ke hari berikutnya jika sudah lewat
-        
-        const h = Math.floor(diff/3600000).toString().padStart(2,'0');
-        const m = Math.floor((diff%3600000)/60000).toString().padStart(2,'0');
-        const s = Math.floor((diff%60000)/1000).toString().padStart(2,'0');
-        document.getElementById('ny-countdown').innerText = `NY OPENS IN: ${h}:${m}:${s}`;
-    }, 1000);
+    // Modifikasi Kalkulator Profit/Loss
+    function calculateRisk() {
+        const lot = parseFloat(document.getElementById('lot').value);
+        const entry = parseFloat(document.getElementById('entry').value);
+        const exit = parseFloat(document.getElementById('exit').value);
+        const sl = parseFloat(document.getElementById('sl').value);
 
-    // 4. Tab Switcher
-    function openTab(id) {
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        if(lot && entry && exit) {
+            // Formula XAUUSD: (Exit - Entry) * Lot * 100
+            const profit = (exit - entry) * lot * 100;
+            const loss = (entry - sl) * lot * 100;
+            
+            document.getElementById('prof-res').innerText = "$" + profit.toFixed(2);
+            document.getElementById('risk-res').innerText = "-$" + Math.abs(loss).toFixed(2);
+        }
+    }
+
+    function tab(id) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         event.currentTarget.classList.add('active');
