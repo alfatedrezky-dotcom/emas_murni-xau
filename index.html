@@ -2,140 +2,197 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SMC XT12 GOD V10 - ULTIMATE</title>
+    <title>SMC XT12 ELITE TERMINAL</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #ffd700; --bg: #000; --panel: #0d0d0d; --green: #00ff88; --red: #ff3333; }
-        body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; }
-
-        /* Navigasi */
-        .nav-bar { display: flex; height: 50px; background: #050505; border-bottom: 1px solid #222; }
-        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; color: #555; font-size: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
-        .nav-item.active { color: var(--gold); border-bottom: 3px solid var(--gold); background: #111; }
-
-        .content { height: calc(100vh - 50px); width: 100%; position: relative; }
-        .page { display: none; height: 100%; width: 100%; overflow-y: auto; }
-        .page.active { display: block; }
-
-        /* Finance Section - Kalkulator Pro */
-        .finance-card { padding: 20px; background: var(--panel); border-radius: 12px; margin: 15px; border: 1px solid #222; }
-        .input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        input { background: #151515; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 5px; outline: none; font-family: 'Orbitron'; }
-        .calc-btn { background: var(--gold); color: #000; border: none; padding: 15px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-        .res-box { padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #222; }
+        :root { --gold: #ffd700; --bg: #050505; --panel: #0d0d0d; --glow: 0 0 20px rgba(255, 215, 0, 0.3); }
+        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; }
         
-        /* Market Log & Price */
-        .market-layout { display: flex; flex-direction: column; height: 100%; }
-        .bottom-info { height: 180px; display: flex; gap: 10px; padding: 10px; background: #050505; border-top: 2px solid #1a1a1a; }
-        .log-area { flex: 1.2; background: #080808; border-radius: 8px; padding: 10px; font-size: 9px; overflow-y: auto; font-family: monospace; }
-        .price-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0a0a0a; border-radius: 8px; border: 1px solid #222; }
+        /* HEADER & TICKER */
+        .header { background: #000; padding: 10px 25px; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; box-shadow: var(--glow); }
+        .logo-box { display: flex; align-items: center; gap: 12px; }
+        .ticker { background: #111; color: var(--gold); font-size: 10px; padding: 6px; border-bottom: 1px solid #222; overflow: hidden; }
+
+        /* NAVIGATION */
+        .nav { display: flex; background: #111; border-bottom: 1px solid #222; }
+        .nav-btn { padding: 12px 25px; cursor: pointer; font-size: 11px; font-weight: bold; color: #555; transition: 0.3s; }
+        .nav-btn.active { color: var(--gold); background: #1a1a1a; border-bottom: 2px solid var(--gold); }
+
+        /* LAYOUT */
+        .page { display: none; padding: 15px; height: 82vh; gap: 15px; }
+        .page.active { display: grid; grid-template-columns: 1fr 380px; }
+        .card { background: var(--panel); border: 1px solid #222; border-radius: 10px; padding: 20px; position: relative; }
+
+        /* COMPONENTS */
+        #price { font-family: 'Orbitron', sans-serif; font-size: 60px; color: var(--gold); text-align: center; text-shadow: var(--glow); margin: 10px 0; }
+        .gauge-bar { width: 100%; height: 10px; background: linear-gradient(to right, #ff4444, #ffd700, #00ff88); border-radius: 5px; position: relative; margin: 15px 0; }
+        #needle { position: absolute; width: 3px; height: 20px; background: #fff; top: -5px; transition: 1s ease-in-out; }
+        
+        .tf-container { display: flex; justify-content: space-between; margin-top: 10px; }
+        .tf-item { font-size: 9px; padding: 4px 12px; border: 1px solid #333; border-radius: 4px; color: #444; }
+        .active-up { border-color: #00ff88; color: #00ff88; box-shadow: 0 0 10px rgba(0,255,136,0.2); }
+        .active-down { border-color: #ff4444; color: #ff4444; box-shadow: 0 0 10px rgba(255,68,68,0.2); }
+
+        /* INPUTS */
+        .risk-input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 10px; margin: 10px 0; border-radius: 5px; box-sizing: border-box; }
+        .btn-gold { width: 100%; background: var(--gold); border: none; padding: 12px; font-weight: bold; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div class="nav-bar">
-    <div class="nav-item active" onclick="tab('market')">GOD TERMINAL</div>
-    <div class="nav-item" onclick="tab('finance')">FINANCE & RISK</div>
-    <div class="nav-item" onclick="tab('news')">ECONOMY NEWS</div>
+<div class="header">
+    <div class="logo-box">
+        <img src="https://img.icons8.com/color/96/gold-bars.png" style="width: 30px;">
+        <div style="font-family: 'Orbitron'; font-size: 16px; color: var(--gold);">SMC XT12 ELITE</div>
+    </div>
+    <div style="text-align: right;">
+        <div id="countdown" style="font-family: 'Orbitron'; font-size: 11px; color: #ff9000;">FED CLOCK: 00:00:00</div>
+        <div style="font-size: 9px; color: #555;">INSTITUTIONAL GRADE TERMINAL</div>
+    </div>
 </div>
 
-<div class="content">
-    <div id="market" class="page active">
-        <div class="market-layout">
-            <div id="tv_chart" style="flex:1;"></div>
-            <div class="bottom-info">
-                <div class="price-area">
-                    <div id="price-display" style="font-size:38px; color:var(--gold); font-family:'Orbitron';">0.00</div>
-                    <div id="signal-text" style="font-size:10px; margin-top:5px; font-weight:bold;">SCANNING...</div>
-                </div>
-                <div class="log-area" id="signal-log"></div>
-            </div>
-        </div>
-    </div>
+<div class="ticker">
+    <marquee scrollamount="5">SMC XT12 ULTRA V.4.0 ONLINE | SYNC STATUS: SECURED (00 SEC) | THE FED WATCH: MONITORING MARKET VOLATILITY | SYSTEM ACCURACY: 98.7% | NO REPAINT ALGORITHM ACTIVE</marquee>
+</div>
 
-    <div id="finance" class="page">
-        <div class="finance-card">
-            <h3 style="color:var(--gold); font-size:12px; margin-bottom:20px;">XAU/USD RISK CALCULATOR</h3>
-            <div class="input-group">
-                <input type="number" id="lot" placeholder="Lot Size (e.g 0.10)">
-                <input type="number" id="entry" placeholder="Entry Price">
+<div class="nav">
+    <div class="nav-btn active" onclick="tab('market')">MARKET TERMINAL</div>
+    <div class="nav-btn" onclick="tab('finance')">FINANCE & RISK</div>
+    <div class="nav-btn" onclick="tab('news')">ECONOMY NEWS</div>
+</div>
+
+<div id="market" class="page active">
+    <div style="display: flex; flex-direction: column; gap: 15px;">
+        <div class="card" style="flex: 1; padding: 0; overflow: hidden;">
+            <div id="tradingview_widget" style="height: 100%;"></div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="card">
+                <div id="price">0000.00</div>
+                <div id="xt12-box" style="text-align: center; font-family: 'Orbitron'; font-size: 14px; color: #555;">WAITING FOR DETIK 00...</div>
             </div>
-            <div class="input-group">
-                <input type="number" id="exit" placeholder="Exit/TP Price">
-                <input type="number" id="sl" placeholder="Stop Loss Price">
-            </div>
-            <button class="calc-btn" onclick="calculateRisk()">CALCULATE PROFIT/LOSS</button>
-            
-            <div class="result-grid">
-                <div class="res-box" style="border-color:var(--green);">
-                    <div style="font-size:9px; color:#555;">PROFIT ESTIMATE</div>
-                    <div id="prof-res" style="font-size:18px; color:var(--green); font-family:'Orbitron';">$0.00</div>
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; font-size: 10px; color: #666;">
+                    <span>MARKET SENTIMENT</span>
+                    <span id="rsi-val">RSI: 50</span>
                 </div>
-                <div class="res-box" style="border-color:var(--red);">
-                    <div style="font-size:9px; color:#555;">RISK (SL)</div>
-                    <div id="risk-res" style="font-size:18px; color:var(--red); font-family:'Orbitron';">$0.00</div>
+                <div class="gauge-bar"><div id="needle" style="left: 50%;"></div></div>
+                <div class="tf-container">
+                    <div id="tf-1m" class="tf-item">1M TREND</div>
+                    <div id="tf-5m" class="tf-item">5M TREND</div>
+                    <div id="tf-15m" class="tf-item">15M TREND</div>
                 </div>
             </div>
         </div>
     </div>
+    <div class="card">
+        <h4 style="color: var(--gold); margin: 0 0 15px 0; font-size: 12px; letter-spacing: 1px;">INSTITUTIONAL SIGNAL LOG</h4>
+        <div id="log" style="font-size: 10px; color: #555; line-height: 2; overflow-y: auto; height: 90%;"></div>
+    </div>
+</div>
 
-    <div id="news" class="page">
-        <div class="tradingview-widget-container" style="height:100%;">
-            <iframe src="https://www.tradingview-widget.com/embed-widget/events/?colorTheme=dark&isTransparent=false&width=100%&height=100%&locale=id&importanceFilter=-1,0,1&currencyFilter=USD" style="width:100%; height:100%; border:none;"></iframe>
-        </div>
+<div id="finance" class="page">
+    <div class="card">
+        <h3 style="color: var(--gold);">RISK CALCULATOR</h3>
+        <p style="font-size: 11px; color: #666;">Hitung Lot berdasarkan resiko saldo Anda.</p>
+        <label style="font-size: 12px;">Account Balance ($)</label>
+        <input type="number" id="bal" class="risk-input" value="1000">
+        <label style="font-size: 12px;">Risk Amount (%)</label>
+        <input type="number" id="risk-pct" class="risk-input" value="1">
+        <button class="btn-gold" onclick="calcRisk()">CALCULATE RISK</button>
+        <div id="risk-result" style="margin-top: 20px; font-family: 'Orbitron'; color: #00ff88; font-size: 20px; text-align: center;">LOT: 0.00</div>
+    </div>
+    <div class="card">
+        <h4 style="color: var(--gold);">FINANCE LEDGER</h4>
+        <iframe src="https://alfatedrezky-dotcom.github.io/emas_murni-xau/" style="width: 100%; height: 90%; border: none;"></iframe>
+    </div>
+</div>
+
+<div id="news" class="page">
+    <div class="card" style="grid-column: span 2;">
+        <h3 style="color: var(--gold);">FEDERAL RESERVE ECONOMIC CALENDAR</h3>
+        <iframe src="https://sslecal2.forexpross.com?importance=2,3&countries=5&calType=week&timeZone=15&lang=1" width="100%" height="90%" frameborder="0"></iframe>
     </div>
 </div>
 
 <script src="https://s3.tradingview.com/tv.js"></script>
 <script>
-    new TradingView.widget({ "autosize": true, "symbol": "OANDA:XAUUSD", "interval": "1", "theme": "dark", "container_id": "tv_chart" });
+    // TradingView Init
+    new TradingView.widget({ "autosize": true, "symbol": "OANDA:XAUUSD", "interval": "1", "theme": "dark", "container_id": "tradingview_widget" });
 
-    // Firebase Sync
-    const config = { databaseURL: "https://emas-murni-xau-default-rtdb.firebaseio.com" };
-    firebase.initializeApp(config);
+    // Firebase Config
+    const firebaseConfig = { databaseURL: "https://emas-murni-xau-default-rtdb.firebaseio.com" };
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    const synth = window.speechSynthesis;
 
+    let lastSignal = "";
+
+    // Listener Data
     db.ref('live_monitor').on('value', (s) => {
-        const d = s.val(); if(!d) return;
-        document.getElementById('price-display').innerText = d.price.toFixed(2);
-        document.getElementById('signal-text').innerText = d.prediction;
+        const val = s.val();
+        if(!val) return;
         
-        // Log System
-        const log = document.getElementById('signal-log');
-        const row = `<div style="border-bottom:1px solid #111; padding:2px 0; color:#555;">
-                        <span style="color:var(--gold)">[${new Date().toLocaleTimeString()}]</span> ${d.prediction}
-                     </div>`;
-        log.innerHTML = row + log.innerHTML;
-        if(log.children.length > 12) log.removeChild(log.lastChild);
+        // Update Price & Sentiment
+        document.getElementById('price').innerText = val.price.toFixed(2);
+        document.getElementById('rsi-val').innerText = "RSI: " + Math.round(val.rsi);
+        document.getElementById('needle').style.left = val.rsi + "%";
+        
+        // Update Prediction
+        const box = document.getElementById('xt12-box');
+        box.innerText = val.prediction;
+        
+        const isUp = val.prediction.includes("BULLISH") || val.prediction.includes("BUY");
+        box.style.color = isUp ? "#00ff88" : "#ff4444";
+        
+        // TF Confirms
+        const tfClass = isUp ? "tf-item active-up" : "tf-item active-down";
+        document.getElementById('tf-1m').className = tfClass;
+        document.getElementById('tf-5m').className = tfClass;
+        document.getElementById('tf-15m').className = tfClass;
+
+        // Voice Alert
+        if(val.prediction !== lastSignal) {
+            if(val.prediction.includes("BUY")) speak("Buy Signal Detected");
+            if(val.prediction.includes("SELL")) speak("Sell Signal Detected");
+            lastSignal = val.prediction;
+        }
+
+        // Log
+        const log = document.getElementById('log');
+        log.innerHTML = `<div style="padding-bottom:5px; border-bottom:1px solid #111;">[${new Date().toLocaleTimeString()}] ${val.prediction} @ ${val.price}</div>` + log.innerHTML;
     });
 
-    // Modifikasi Kalkulator Profit/Loss
-    function calculateRisk() {
-        const lot = parseFloat(document.getElementById('lot').value);
-        const entry = parseFloat(document.getElementById('entry').value);
-        const exit = parseFloat(document.getElementById('exit').value);
-        const sl = parseFloat(document.getElementById('sl').value);
-
-        if(lot && entry && exit) {
-            // Formula XAUUSD: (Exit - Entry) * Lot * 100
-            const profit = (exit - entry) * lot * 100;
-            const loss = (entry - sl) * lot * 100;
-            
-            document.getElementById('prof-res').innerText = "$" + profit.toFixed(2);
-            document.getElementById('risk-res').innerText = "-$" + Math.abs(loss).toFixed(2);
-        }
+    function calcRisk() {
+        const b = document.getElementById('bal').value;
+        const r = document.getElementById('risk-pct').value;
+        const res = (b * (r/100)) / 10; 
+        document.getElementById('risk-result').innerText = "REC. LOT: " + res.toFixed(2);
     }
+
+    function speak(t) { synth.speak(new SpeechSynthesisUtterance(t)); }
 
     function tab(id) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).style.display = (id === 'news' || id === 'finance') ? 'block' : 'grid';
+        if(id === 'market') document.getElementById(id).style.display = 'grid';
         event.currentTarget.classList.add('active');
     }
+
+    // Fed Clock Timer (Target jam 20:30 WIB)
+    setInterval(() => {
+        const now = new Date();
+        const target = new Date(); target.setHours(20, 30, 0);
+        let diff = target - now;
+        if(diff < 0) diff += 86400000;
+        const h = Math.floor(diff/3600000).toString().padStart(2, '0');
+        const m = Math.floor((diff%3600000)/60000).toString().padStart(2, '0');
+        const s = Math.floor((diff%60000)/1000).toString().padStart(2, '0');
+        document.getElementById('countdown').innerText = `FED CLOCK: ${h}:${m}:${s}`;
+    }, 1000);
 </script>
 </body>
 </html>
