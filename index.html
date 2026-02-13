@@ -10,12 +10,12 @@
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
     <style>
         :root { --neon: #00ff88; --danger: #ff4444; --gold: #ffd700; --panel: #0d0d0d; --bg: #020202; }
-        body { background: var(--bg); color: #eee; font-family: 'Inter', sans-serif; margin: 0; padding: 15px; }
+        body { background: var(--bg); color: #eee; font-family: 'Inter', sans-serif; margin: 0; padding: 15px; overflow-x: hidden; }
         .grid { display: grid; grid-template-columns: 320px 1fr 320px; gap: 15px; }
         .panel { background: var(--panel); border: 1px solid #1a1a1a; border-radius: 12px; padding: 15px; position: relative; }
-        #chart-container { height: 400px; width: 100%; margin-top: 15px; border-radius: 8px; overflow: hidden; }
-        #price { font-size: 50px; font-weight: 900; text-align: center; margin: 5px 0; font-family: 'Courier New'; }
-        .signal-banner { padding: 15px; border-radius: 8px; font-size: 18px; font-weight: bold; text-align: center; border: 1px solid #333; margin-bottom: 10px; }
+        #chart-container { height: 400px; width: 100%; margin-top: 15px; border-radius: 8px; overflow: hidden; background: #000; }
+        #price { font-size: 50px; font-weight: 900; text-align: center; margin: 5px 0; font-family: 'Courier New'; color: var(--gold); }
+        .signal-banner { padding: 15px; border-radius: 8px; font-size: 18px; font-weight: bold; text-align: center; border: 1px solid #333; margin-bottom: 10px; transition: 0.3s; }
         .buy { color: var(--neon); border-color: var(--neon); background: rgba(0,255,136,0.05); }
         .sell { color: var(--danger); border-color: var(--danger); background: rgba(255,68,68,0.05); }
         input { background: #111; border: 1px solid #333; color: #fff; padding: 10px; width: 100%; margin-bottom: 10px; border-radius: 5px; box-sizing: border-box; }
@@ -23,6 +23,7 @@
         .btn-mail { background: var(--gold); color: #000; margin-top: 15px; }
         .scroll { height: 180px; overflow-y: auto; font-size: 11px; scrollbar-width: thin; }
         .ledger-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #111; }
+        @media (max-width: 1000px) { .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -37,7 +38,7 @@
 
     <div class="panel">
         <div id="price">0000.00</div>
-        <div id="signal-box" class="signal-banner">SYNCING WITH TERMUX...</div>
+        <div id="signal-box" class="signal-banner">WAITING FOR TERMUX FEED...</div>
         <div id="chart-container"></div>
     </div>
 
@@ -45,11 +46,11 @@
         <div style="font-size: 10px; color: #555; margin-bottom:10px;">M1 SIGNAL LOG</div>
         <div id="signal-log" class="scroll"></div>
         <div style="margin-top: 20px;">
-            <div style="font-size: 9px; color: #555;">PERMANENT ENTRY</div>
+            <div style="font-size: 9px; color: #555; margin-bottom: 5px;">RECORD TRANSACTION</div>
             <input type="text" id="f-desc" placeholder="Keterangan">
             <input type="number" id="f-amt" placeholder="Jumlah (Rp)">
-            <button class="btn" style="background:var(--neon); color:#000" onclick="addFinance('IN')">INCOME (+)</button>
-            <button class="btn" style="background:var(--danger); color:#fff" onclick="addFinance('OUT')">EXPENSE (-)</button>
+            <button class="btn" style="background:var(--neon); color:#000" onclick="addFinance('IN')">RECORD INCOME (+)</button>
+            <button class="btn" style="background:var(--danger); color:#fff" onclick="addFinance('OUT')">RECORD EXPENSE (-)</button>
         </div>
     </div>
 </div>
@@ -60,18 +61,18 @@
 </div>
 
 <script>
-    // 1. FIREBASE CONFIG
-    const firebaseConfig = { databaseURL: "https://emas_murni-xau.firebaseio.com/live_monitor.json" };
+    // 1. KONFIGURASI FIREBASE - SESUAIKAN DENGAN LOG TERMUX ANDA
+    const firebaseConfig = { 
+        databaseURL: "https://emas_murni-xau-default-rtdb.firebaseio.com" 
+    };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 2. INITIALIZE TRADINGVIEW CANDLESTICK CHART
+    // 2. INISIALISASI GRAFIK CANDLESTICK (TRADINGVIEW STYLE)
     const chart = LightweightCharts.createChart(document.getElementById('chart-container'), {
         layout: { backgroundColor: '#0d0d0d', textColor: '#d1d4dc' },
         grid: { vertLines: { color: '#1a1a1a' }, horzLines: { color: '#1a1a1a' } },
-        crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
-        priceScale: { borderColor: '#1a1a1a' },
-        timeScale: { borderColor: '#1a1a1a', timeVisible: true, secondsVisible: true }
+        timeScale: { timeVisible: true, secondsVisible: true, borderColor: '#333' }
     });
     const candleSeries = chart.addCandlestickSeries({
         upColor: '#00ff88', downColor: '#ff4444', borderDownColor: '#ff4444',
@@ -79,23 +80,26 @@
     });
 
     let currentCandle = { open: null, high: null, low: null, close: null, time: null };
-    let financeData = JSON.parse(localStorage.getItem('jurnal_v8')) || [];
+    let financeData = JSON.parse(localStorage.getItem('jurnal_v9')) || [];
     let lastPrice = 0;
     let myChart;
 
-    // 3. LISTEN TO TERMUX (PYTHON)
+    // 3. SINKRONISASI REAL-TIME DARI TERMUX
     db.ref('live_monitor').on('value', (snapshot) => {
         const data = snapshot.val();
         if(data) {
             const price = data.price;
             const time = Math.floor(data.timestamp);
             
-            document.getElementById('price').innerText = price.toFixed(2);
-            document.getElementById('price').style.color = price > lastPrice ? '#00ff88' : '#ff4444';
+            // Update Angka Utama
+            const priceEl = document.getElementById('price');
+            priceEl.innerText = price.toFixed(2);
+            priceEl.style.color = price > lastPrice ? '#00ff88' : '#ff4444';
 
-            // Logika Pembentukan Candle (M1)
-            if (!currentCandle.time || time >= currentCandle.time + 60) {
-                currentCandle = { open: price, high: price, low: price, close: price, time: Math.floor(time/60)*60 };
+            // Logika Pembentukan Candle M1
+            const candleTime = Math.floor(time / 60) * 60;
+            if (!currentCandle.time || candleTime > currentCandle.time) {
+                currentCandle = { open: price, high: price, low: price, close: price, time: candleTime };
             } else {
                 currentCandle.close = price;
                 if (price > currentCandle.high) currentCandle.high = price;
@@ -103,7 +107,7 @@
             }
             candleSeries.update(currentCandle);
 
-            // Sinyal Update
+            // Update Sinyal Banner
             const side = price > lastPrice ? 'BUY' : 'SELL';
             const box = document.getElementById('signal-box');
             box.innerText = `M1 ${side} CONFIRMED`;
@@ -111,15 +115,19 @@
             
             lastPrice = price;
         }
+    }, (err) => {
+        document.getElementById('signal-box').innerText = "FIREBASE ERROR: CHECK RULES";
     });
 
-    // 4. FINANCE SYSTEM
+    // 4. SISTEM MANAJEMEN KEUANGAN (JURNAL)
     function addFinance(type) {
         const desc = document.getElementById('f-desc').value;
         const amt = parseFloat(document.getElementById('f-amt').value);
         if(!desc || !amt) return;
         financeData.push({ date: new Date().toLocaleString(), desc, amt, type });
-        localStorage.setItem('jurnal_v8', JSON.stringify(financeData));
+        localStorage.setItem('jurnal_v9', JSON.stringify(financeData));
+        document.getElementById('f-desc').value = '';
+        document.getElementById('f-amt').value = '';
         renderFinance();
     }
 
@@ -146,10 +154,14 @@
         });
     }
 
+    // 5. FITUR GMAIL
     function kirimKeGmail() {
-        let report = "--- BUKU JURNAL KEUANGAN ---\n";
-        financeData.forEach((item, i) => { report += `${i+1}. ${item.date} | ${item.desc} | Rp ${item.amt.toLocaleString()} (${item.type})\n`; });
-        window.location.href = `mailto:rezkyalfayed56@gmail.com?subject=Jurnal Bulanan&body=${encodeURIComponent(report)}`;
+        let report = "--- BUKU JURNAL KEUANGAN DIGITAL ---\n";
+        financeData.forEach((item, i) => {
+            report += `${i+1}. ${item.date} | ${item.desc} | Rp ${item.amt.toLocaleString()} (${item.type})\n`;
+        });
+        report += `\nSALDO AKHIR: ${document.getElementById('total-balance').innerText}`;
+        window.location.href = `mailto:rezkyalfayed56@gmail.com?subject=Laporan Jurnal Bulanan&body=${encodeURIComponent(report)}`;
     }
 
     renderFinance();
