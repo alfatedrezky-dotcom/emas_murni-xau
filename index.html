@@ -20,7 +20,6 @@
     </style>
 </head>
 <body>
-
 <div class="grid">
     <div class="panel">
         <div style="color:#ffd700; font-size: 10px;">FINANCE LEDGER</div>
@@ -31,41 +30,33 @@
         <button onclick="addTrans('OUT')" style="background:#ff4444; color:#fff;">EXPENSE (-)</button>
         <div id="hist" class="scroll"></div>
     </div>
-
     <div class="panel">
         <div id="price">0000.00</div>
-        <div id="sig" class="sig-box">WAITING FOR TERMUX...</div>
+        <div id="sig" class="sig-box">WAITING FOR DATA...</div>
         <div id="chart" style="height: 400px;"></div>
     </div>
-
     <div class="panel">
         <div style="color:#ffd700; font-size: 10px;">SIGNAL ENGINE LOG</div>
         <div id="log" class="scroll"></div>
     </div>
 </div>
-
 <script>
     const conf = { databaseURL: "https://emas_murni-xau-default-rtdb.firebaseio.com" };
     firebase.initializeApp(conf);
     const db = firebase.database();
-
     const chart = LightweightCharts.createChart(document.getElementById('chart'), {
         layout: { backgroundColor: '#0a0a0a', textColor: '#d1d4dc' },
         grid: { vertLines: { color: '#111' }, horzLines: { color: '#111' } }
     });
     const candle = chart.addCandlestickSeries({ upColor: '#00ff88', downColor: '#ff4444' });
-
     let lastP = 0;
-    let records = JSON.parse(localStorage.getItem('fin_v10')) || [];
-
+    let records = JSON.parse(localStorage.getItem('fin_vfinal')) || [];
     db.ref('live_monitor').on('value', (s) => {
         const val = s.val();
         if(!val || !val.price) return;
         const p = val.price;
-        
         document.getElementById('price').innerText = p.toFixed(2);
         document.getElementById('price').style.color = p > lastP ? '#00ff88' : '#ff4444';
-
         if(lastP > 0 && p !== lastP) {
             const side = p > lastP ? 'BUY' : 'SELL';
             const sigEl = document.getElementById('sig');
@@ -73,20 +64,17 @@
             sigEl.className = "sig-box " + side.toLowerCase();
             document.getElementById('log').innerHTML = "<div>[" + new Date().toLocaleTimeString() + "] " + side + " @ " + p + "</div>" + document.getElementById('log').innerHTML;
         }
-
         candle.update({ time: Math.floor(val.timestamp), open: p, high: p, low: p, close: p });
         lastP = p;
     });
-
     function addTrans(type) {
         const d = document.getElementById('desc').value;
         const a = parseFloat(document.getElementById('amt').value);
         if(!d || isNaN(a)) return;
-        records.push({ d, a, type, time: new Date().toLocaleString() });
-        localStorage.setItem('fin_v10', JSON.stringify(records));
+        records.push({ d, a, type });
+        localStorage.setItem('fin_vfinal', JSON.stringify(records));
         render();
     }
-
     function render() {
         let total = 0;
         const h = document.getElementById('hist');
