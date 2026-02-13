@@ -2,197 +2,112 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>SMC XT12 ELITE TERMINAL</title>
+    <title>SMC ELITE - XT12 THE FED WATCH</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #ffd700; --bg: #050505; --panel: #0d0d0d; --glow: 0 0 20px rgba(255, 215, 0, 0.3); }
+        :root { --gold: #ffd700; --bg: #050505; --panel: #0d0d0d; }
         body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; }
         
-        /* HEADER & TICKER */
-        .header { background: #000; padding: 10px 25px; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; box-shadow: var(--glow); }
+        /* HEADER & LOGO */
+        .header { background: #000; padding: 15px 30px; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; }
         .logo-box { display: flex; align-items: center; gap: 12px; }
-        .ticker { background: #111; color: var(--gold); font-size: 10px; padding: 6px; border-bottom: 1px solid #222; overflow: hidden; }
+        .title { font-family: 'Orbitron', sans-serif; font-size: 16px; color: var(--gold); letter-spacing: 2px; }
 
-        /* NAVIGATION */
+        /* NAVIGASI TAB */
         .nav { display: flex; background: #111; border-bottom: 1px solid #222; }
-        .nav-btn { padding: 12px 25px; cursor: pointer; font-size: 11px; font-weight: bold; color: #555; transition: 0.3s; }
+        .nav-btn { padding: 15px 25px; cursor: pointer; font-size: 11px; font-weight: bold; color: #555; transition: 0.3s; }
         .nav-btn.active { color: var(--gold); background: #1a1a1a; border-bottom: 2px solid var(--gold); }
 
-        /* LAYOUT */
-        .page { display: none; padding: 15px; height: 82vh; gap: 15px; }
-        .page.active { display: grid; grid-template-columns: 1fr 380px; }
-        .card { background: var(--panel); border: 1px solid #222; border-radius: 10px; padding: 20px; position: relative; }
-
-        /* COMPONENTS */
-        #price { font-family: 'Orbitron', sans-serif; font-size: 60px; color: var(--gold); text-align: center; text-shadow: var(--glow); margin: 10px 0; }
-        .gauge-bar { width: 100%; height: 10px; background: linear-gradient(to right, #ff4444, #ffd700, #00ff88); border-radius: 5px; position: relative; margin: 15px 0; }
-        #needle { position: absolute; width: 3px; height: 20px; background: #fff; top: -5px; transition: 1s ease-in-out; }
+        /* PAGES */
+        .page { display: none; padding: 20px; height: 80vh; }
+        .page.active { display: grid; grid-template-columns: 1fr 350px; gap: 15px; }
+        .card { background: var(--panel); border: 1px solid #222; border-radius: 12px; padding: 20px; }
         
-        .tf-container { display: flex; justify-content: space-between; margin-top: 10px; }
-        .tf-item { font-size: 9px; padding: 4px 12px; border: 1px solid #333; border-radius: 4px; color: #444; }
-        .active-up { border-color: #00ff88; color: #00ff88; box-shadow: 0 0 10px rgba(0,255,136,0.2); }
-        .active-down { border-color: #ff4444; color: #ff4444; box-shadow: 0 0 10px rgba(255,68,68,0.2); }
-
-        /* INPUTS */
-        .risk-input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 10px; margin: 10px 0; border-radius: 5px; box-sizing: border-box; }
-        .btn-gold { width: 100%; background: var(--gold); border: none; padding: 12px; font-weight: bold; border-radius: 5px; cursor: pointer; }
+        /* PRICE & ANALYTICS */
+        #price { font-family: 'Orbitron', sans-serif; font-size: 80px; color: var(--gold); text-align: center; margin: 15px 0; }
+        #xt12-box { text-align: center; padding: 15px; border-radius: 8px; border: 2px solid #333; font-family: 'Orbitron'; font-size: 20px; }
     </style>
 </head>
 <body>
 
 <div class="header">
     <div class="logo-box">
-        <img src="https://img.icons8.com/color/96/gold-bars.png" style="width: 30px;">
-        <div style="font-family: 'Orbitron'; font-size: 16px; color: var(--gold);">SMC XT12 ELITE</div>
+        <img src="https://img.icons8.com/color/96/gold-bars.png" style="width: 35px;">
+        <div class="title">SMC ULTRA-PRECISION TERMINAL</div>
     </div>
-    <div style="text-align: right;">
-        <div id="countdown" style="font-family: 'Orbitron'; font-size: 11px; color: #ff9000;">FED CLOCK: 00:00:00</div>
-        <div style="font-size: 9px; color: #555;">INSTITUTIONAL GRADE TERMINAL</div>
+    <div style="text-align: right; display: flex; align-items: center; gap: 10px;">
+        <div style="font-size: 9px; color: #666;">INSTITUTIONAL GRADE<br><b>THE FED WATCH</b></div>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Seal_of_the_United_States_Federal_Reserve_System.svg" style="width: 40px; filter: invert(1);">
     </div>
-</div>
-
-<div class="ticker">
-    <marquee scrollamount="5">SMC XT12 ULTRA V.4.0 ONLINE | SYNC STATUS: SECURED (00 SEC) | THE FED WATCH: MONITORING MARKET VOLATILITY | SYSTEM ACCURACY: 98.7% | NO REPAINT ALGORITHM ACTIVE</marquee>
 </div>
 
 <div class="nav">
     <div class="nav-btn active" onclick="tab('market')">MARKET TERMINAL</div>
-    <div class="nav-btn" onclick="tab('finance')">FINANCE & RISK</div>
-    <div class="nav-btn" onclick="tab('news')">ECONOMY NEWS</div>
+    <div class="nav-btn" onclick="tab('news')">ECONOMY CALENDAR</div>
 </div>
 
 <div id="market" class="page active">
-    <div style="display: flex; flex-direction: column; gap: 15px;">
-        <div class="card" style="flex: 1; padding: 0; overflow: hidden;">
-            <div id="tradingview_widget" style="height: 100%;"></div>
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            <div class="card">
-                <div id="price">0000.00</div>
-                <div id="xt12-box" style="text-align: center; font-family: 'Orbitron'; font-size: 14px; color: #555;">WAITING FOR DETIK 00...</div>
-            </div>
-            <div class="card">
-                <div style="display: flex; justify-content: space-between; font-size: 10px; color: #666;">
-                    <span>MARKET SENTIMENT</span>
-                    <span id="rsi-val">RSI: 50</span>
-                </div>
-                <div class="gauge-bar"><div id="needle" style="left: 50%;"></div></div>
-                <div class="tf-container">
-                    <div id="tf-1m" class="tf-item">1M TREND</div>
-                    <div id="tf-5m" class="tf-item">5M TREND</div>
-                    <div id="tf-15m" class="tf-item">15M TREND</div>
-                </div>
-            </div>
+    <div class="card">
+        <div style="text-align: center; color: #444; font-size: 11px; letter-spacing: 2px;">XAU/USD PRECISION SYNC (SEC: 00)</div>
+        <div id="price">0000.00</div>
+        <div id="xt12-box">INITIALIZING XT12...</div>
+        <div style="display: flex; justify-content: space-around; margin-top: 25px; font-size: 11px; color: #00ff88;">
+            <span>● SYNC: 1 MIN CYCLE</span>
+            <span>● ALGO: XT12 V2</span>
+            <span>● STATUS: SECURED</span>
         </div>
     </div>
     <div class="card">
-        <h4 style="color: var(--gold); margin: 0 0 15px 0; font-size: 12px; letter-spacing: 1px;">INSTITUTIONAL SIGNAL LOG</h4>
-        <div id="log" style="font-size: 10px; color: #555; line-height: 2; overflow-y: auto; height: 90%;"></div>
+        <h4 style="color: var(--gold); border-bottom: 1px solid #222; padding-bottom: 10px;">SIGNAL LOG</h4>
+        <div id="log" style="font-size: 11px; color: #666; line-height: 2.5; overflow-y: auto; height: 350px;"></div>
     </div>
 </div>
 
-<div id="finance" class="page">
+<div id="news" class="page" style="grid-template-columns: 1fr;">
     <div class="card">
-        <h3 style="color: var(--gold);">RISK CALCULATOR</h3>
-        <p style="font-size: 11px; color: #666;">Hitung Lot berdasarkan resiko saldo Anda.</p>
-        <label style="font-size: 12px;">Account Balance ($)</label>
-        <input type="number" id="bal" class="risk-input" value="1000">
-        <label style="font-size: 12px;">Risk Amount (%)</label>
-        <input type="number" id="risk-pct" class="risk-input" value="1">
-        <button class="btn-gold" onclick="calcRisk()">CALCULATE RISK</button>
-        <div id="risk-result" style="margin-top: 20px; font-family: 'Orbitron'; color: #00ff88; font-size: 20px; text-align: center;">LOT: 0.00</div>
-    </div>
-    <div class="card">
-        <h4 style="color: var(--gold);">FINANCE LEDGER</h4>
-        <iframe src="https://alfatedrezky-dotcom.github.io/emas_murni-xau/" style="width: 100%; height: 90%; border: none;"></iframe>
+        <h3 style="color: var(--gold);">GLOBAL ECONOMIC CALENDAR</h3>
+        <iframe src="https://sslecal2.forexpross.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&category=_unemployment,6,1,2,3&importance=2,3&features=datepicker,timezone&countries=5&calType=week&timeZone=15&lang=1" width="100%" height="90%" frameborder="0" allowtransparency="true" marginwidth="0" marginheight="0"></iframe>
     </div>
 </div>
 
-<div id="news" class="page">
-    <div class="card" style="grid-column: span 2;">
-        <h3 style="color: var(--gold);">FEDERAL RESERVE ECONOMIC CALENDAR</h3>
-        <iframe src="https://sslecal2.forexpross.com?importance=2,3&countries=5&calType=week&timeZone=15&lang=1" width="100%" height="90%" frameborder="0"></iframe>
-    </div>
-</div>
-
-<script src="https://s3.tradingview.com/tv.js"></script>
 <script>
-    // TradingView Init
-    new TradingView.widget({ "autosize": true, "symbol": "OANDA:XAUUSD", "interval": "1", "theme": "dark", "container_id": "tradingview_widget" });
-
     // Firebase Config
-    const firebaseConfig = { databaseURL: "https://emas-murni-xau-default-rtdb.firebaseio.com" };
-    firebase.initializeApp(firebaseConfig);
+    const conf = { databaseURL: "https://emas-murni-xau-default-rtdb.firebaseio.com" };
+    firebase.initializeApp(conf);
     const db = firebase.database();
-    const synth = window.speechSynthesis;
 
-    let lastSignal = "";
+    let lastP = 0;
 
-    // Listener Data
+    // Real-time Listener
     db.ref('live_monitor').on('value', (s) => {
         const val = s.val();
         if(!val) return;
         
-        // Update Price & Sentiment
-        document.getElementById('price').innerText = val.price.toFixed(2);
-        document.getElementById('rsi-val').innerText = "RSI: " + Math.round(val.rsi);
-        document.getElementById('needle').style.left = val.rsi + "%";
+        if(val.price) document.getElementById('price').innerText = val.price.toFixed(2);
         
-        // Update Prediction
-        const box = document.getElementById('xt12-box');
-        box.innerText = val.prediction;
-        
-        const isUp = val.prediction.includes("BULLISH") || val.prediction.includes("BUY");
-        box.style.color = isUp ? "#00ff88" : "#ff4444";
-        
-        // TF Confirms
-        const tfClass = isUp ? "tf-item active-up" : "tf-item active-down";
-        document.getElementById('tf-1m').className = tfClass;
-        document.getElementById('tf-5m').className = tfClass;
-        document.getElementById('tf-15m').className = tfClass;
-
-        // Voice Alert
-        if(val.prediction !== lastSignal) {
-            if(val.prediction.includes("BUY")) speak("Buy Signal Detected");
-            if(val.prediction.includes("SELL")) speak("Sell Signal Detected");
-            lastSignal = val.prediction;
+        if(val.prediction) {
+            const box = document.getElementById('xt12-box');
+            box.innerText = val.prediction;
+            box.style.color = val.prediction.includes("BUY") ? "#00ff88" : 
+                             val.prediction.includes("SELL") ? "#ff4444" : var(--gold);
+            box.style.borderColor = box.style.color;
+            
+            if(val.price !== lastP) {
+                const log = document.getElementById('log');
+                log.innerHTML = `<div>[${new Date().toLocaleTimeString()}] ${val.prediction} @ ${val.price}</div>` + log.innerHTML;
+            }
         }
-
-        // Log
-        const log = document.getElementById('log');
-        log.innerHTML = `<div style="padding-bottom:5px; border-bottom:1px solid #111;">[${new Date().toLocaleTimeString()}] ${val.prediction} @ ${val.price}</div>` + log.innerHTML;
+        lastP = val.price;
     });
-
-    function calcRisk() {
-        const b = document.getElementById('bal').value;
-        const r = document.getElementById('risk-pct').value;
-        const res = (b * (r/100)) / 10; 
-        document.getElementById('risk-result').innerText = "REC. LOT: " + res.toFixed(2);
-    }
-
-    function speak(t) { synth.speak(new SpeechSynthesisUtterance(t)); }
 
     function tab(id) {
         document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).style.display = (id === 'news' || id === 'finance') ? 'block' : 'grid';
-        if(id === 'market') document.getElementById(id).style.display = 'grid';
+        document.getElementById(id).style.display = id === 'market' ? 'grid' : 'block';
         event.currentTarget.classList.add('active');
     }
-
-    // Fed Clock Timer (Target jam 20:30 WIB)
-    setInterval(() => {
-        const now = new Date();
-        const target = new Date(); target.setHours(20, 30, 0);
-        let diff = target - now;
-        if(diff < 0) diff += 86400000;
-        const h = Math.floor(diff/3600000).toString().padStart(2, '0');
-        const m = Math.floor((diff%3600000)/60000).toString().padStart(2, '0');
-        const s = Math.floor((diff%60000)/1000).toString().padStart(2, '0');
-        document.getElementById('countdown').innerText = `FED CLOCK: ${h}:${m}:${s}`;
-    }, 1000);
 </script>
 </body>
 </html>
