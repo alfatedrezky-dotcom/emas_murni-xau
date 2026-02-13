@@ -2,112 +2,120 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>SMC QUANTUM | LIVE ENGINE</title>
+    <title>SMC ULTRA-PRECISION | LIVE</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
     <style>
-        :root { --neon: #00ff88; --danger: #ff4444; --gold: #ffd700; --panel: #111; }
-        body { background: #000; color: #eee; font-family: sans-serif; margin: 0; padding: 15px; }
-        .grid { display: grid; grid-template-columns: 300px 1fr 300px; gap: 10px; }
-        .panel { background: var(--panel); border: 1px solid #222; border-radius: 8px; padding: 15px; }
-        #price { font-size: 50px; text-align: center; font-weight: bold; margin: 10px 0; }
-        .signal { padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; margin-bottom: 10px; font-size: 20px; }
-        .buy { background: rgba(0,255,136,0.2); color: var(--neon); border: 1px solid var(--neon); }
-        .sell { background: rgba(255,68,68,0.2); color: var(--danger); border: 1px solid var(--danger); }
-        input { background: #000; border: 1px solid #333; color: #fff; width: 100%; padding: 8px; margin-bottom: 5px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; }
-        .scroll { height: 150px; overflow-y: auto; font-size: 12px; border-top: 1px solid #222; margin-top: 10px; }
+        :root { --neon: #00ff88; --danger: #ff4444; --gold: #ffd700; }
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 10px; overflow: hidden; }
+        .grid { display: grid; grid-template-columns: 300px 1fr 300px; gap: 10px; height: 95vh; }
+        .card { background: #0d0d0d; border: 1px solid #222; border-radius: 8px; padding: 15px; display: flex; flex-direction: column; }
+        #price { font-size: 45px; font-weight: bold; text-align: center; color: var(--gold); margin-bottom: 5px; }
+        .signal-box { padding: 12px; border-radius: 5px; text-align: center; font-weight: bold; border: 1px solid #333; margin-bottom: 10px; transition: 0.3s; }
+        .buy { border-color: var(--neon); color: var(--neon); background: rgba(0,255,136,0.1); }
+        .sell { border-color: var(--danger); color: var(--danger); background: rgba(255,68,68,0.1); }
+        input { background: #111; border: 1px solid #333; color: #fff; padding: 10px; width: 100%; margin-bottom: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; font-weight: bold; border: none; cursor: pointer; border-radius: 5px; }
+        .scroll { flex-grow: 1; overflow-y: auto; font-size: 12px; border-top: 1px solid #222; margin-top: 10px; padding-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="grid">
-    <div class="panel">
-        <div style="color:var(--gold)">LEDGER ANALYTICS</div>
-        <h2 id="balance">Rp 0</h2>
-        <input type="text" id="desc" placeholder="Keterangan">
-        <input type="number" id="amt" placeholder="Jumlah (Rp)">
-        <button style="background:var(--neon); margin-bottom:5px" onclick="addTrans('IN')">INCOME (+)</button>
-        <button style="background:var(--danger)" onclick="addTrans('OUT')">EXPENSE (-)</button>
-        <div id="hist" class="scroll"></div>
+    <div class="card">
+        <div style="color:var(--gold); font-size: 12px; margin-bottom: 5px;">LEDGER ANALYTICS</div>
+        <h2 id="balance" style="margin: 0 0 15px 0;">Rp 0</h2>
+        <input type="text" id="desc" placeholder="Keterangan (misal: Jajan)">
+        <input type="number" id="amount" placeholder="Jumlah (Rp)">
+        <button onclick="addTrans('IN')" style="background:var(--neon); color:#000; margin-bottom:8px;">INCOME (+)</button>
+        <button onclick="addTrans('OUT')" style="background:var(--danger); color:#fff;">EXPENSE (-)</button>
+        <div id="history" class="scroll"></div>
     </div>
 
-    <div class="panel">
+    <div class="card">
         <div id="price">0000.00</div>
-        <div id="sig-box" class="signal">SYNCING ENGINE...</div>
-        <div id="chart" style="height: 350px;"></div>
+        <div id="signal" class="signal-box">WAITING FOR DATA...</div>
+        <div id="chart" style="height: 450px;"></div>
     </div>
 
-    <div class="panel">
-        <div style="color:var(--gold)">M1 SIGNAL LOG</div>
-        <div id="log" class="scroll" style="height: 400px;"></div>
+    <div class="card">
+        <div style="color:var(--gold); font-size: 12px; margin-bottom: 10px;">M1 SIGNAL LOG</div>
+        <div id="log" class="scroll"></div>
     </div>
 </div>
 
 <script>
-    // URL DISAMAKAN DENGAN TERMUX ANDA
-    const conf = { databaseURL: "https://emas_murni-xau-default-rtdb.firebaseio.com" };
-    firebase.initializeApp(conf);
+    // SINKRONISASI DATABASE
+    const firebaseConfig = { databaseURL: "https://emas_murni-xau-default-rtdb.firebaseio.com" };
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Chart Setup
+    // Inisialisasi Chart
     const chart = LightweightCharts.createChart(document.getElementById('chart'), {
-        layout: { backgroundColor: '#111', textColor: '#d1d4dc' },
-        grid: { vertLines: { color: '#222' }, horzLines: { color: '#222' } }
+        layout: { backgroundColor: '#0d0d0d', textColor: '#d1d4dc' },
+        grid: { vertLines: { color: '#1a1a1a' }, horzLines: { color: '#1a1a1a' } },
+        timeScale: { timeVisible: true, secondsVisible: true }
     });
-    const candle = chart.addCandlestickSeries({ upColor: '#00ff88', downColor: '#ff4444' });
+    const candleSeries = chart.addCandlestickSeries({ upColor: '#00ff88', downColor: '#ff4444' });
 
-    let lastP = 0;
-    let records = JSON.parse(localStorage.getItem('my_fin_v2')) || [];
+    let lastPrice = 0;
+    let transactions = JSON.parse(localStorage.getItem('jurnal_data_v5')) || [];
 
-    // REAL-TIME SYNC ENGINE
-    db.ref('live_monitor').on('value', (s) => {
-        const data = s.val();
+    // DATA LISTENER (Real-Time)
+    db.ref('live_monitor').on('value', (snapshot) => {
+        const data = snapshot.val();
         if(!data) return;
 
         const p = data.price;
+        const ts = Math.floor(data.timestamp);
+
+        // Update Harga
         const priceEl = document.getElementById('price');
         priceEl.innerText = p.toFixed(2);
-        priceEl.style.color = p > lastP ? '#00ff88' : '#ff4444';
+        priceEl.style.color = p > lastPrice ? '#00ff88' : '#ff4444';
 
-        // AUTO-SIGNAL LOGIC
-        if(lastP > 0 && p !== lastP) {
-            const side = p > lastP ? 'BUY' : 'SELL';
-            const sigBox = document.getElementById('sig-box');
-            sigBox.innerText = side + " CONFIRMED";
-            sigBox.className = "signal " + side.toLowerCase();
+        // Logika Sinyal & Log
+        if(lastPrice > 0 && p !== lastPrice) {
+            const side = p > lastPrice ? 'BUY' : 'SELL';
+            const sigEl = document.getElementById('signal');
+            sigEl.innerText = side + " CONFIRMED";
+            sigEl.className = "signal-box " + side.toLowerCase();
             
-            const log = document.getElementById('log');
-            log.innerHTML = `<div>[${new Date().toLocaleTimeString()}] ${side} @ ${p}</div>` + log.innerHTML;
+            const logEl = document.getElementById('log');
+            logEl.innerHTML = `<div style="padding:5px 0; border-bottom:1px solid #1a1a1a;">[${new Date().toLocaleTimeString()}] ${side} @ ${p}</div>` + logEl.innerHTML;
         }
 
-        candle.update({ time: Math.floor(data.timestamp), open: p, high: p, low: p, close: p });
-        lastP = p;
+        // Update Chart
+        candleSeries.update({ time: ts, open: p, high: p, low: p, close: p });
+        lastPrice = p;
     });
 
-    // FINANCE SYSTEM
+    // SISTEM JURNAL
     function addTrans(type) {
-        const d = document.getElementById('desc').value;
-        const a = parseFloat(document.getElementById('amt').value);
-        if(!d || !a) return alert("Isi data!");
+        const desc = document.getElementById('desc').value;
+        const amount = parseFloat(document.getElementById('amount').value);
+        if(!desc || isNaN(amount)) return;
 
-        records.push({ d, a, type, t: new Date().toLocaleString() });
-        localStorage.setItem('my_fin_v2', JSON.stringify(records));
-        render();
+        transactions.push({ desc, amount, type, time: new Date().toLocaleString() });
+        localStorage.setItem('jurnal_data_v5', JSON.stringify(transactions));
+        
+        document.getElementById('desc').value = '';
+        document.getElementById('amount').value = '';
+        renderJurnal();
     }
 
-    function render() {
+    function renderJurnal() {
         let total = 0;
-        const h = document.getElementById('hist');
-        h.innerHTML = '';
-        records.forEach(i => {
-            total += (i.type === 'IN' ? i.a : -i.a);
-            h.innerHTML = `<div>${i.d}: Rp ${i.a.toLocaleString()} (${i.type})</div>` + h.innerHTML;
+        const histEl = document.getElementById('history');
+        histEl.innerHTML = '';
+        transactions.forEach(i => {
+            total += (i.type === 'IN' ? i.amount : -i.amount);
+            histEl.innerHTML = `<div style="margin-bottom:8px;">${i.desc}: <span style="color:${i.type==='IN'?'#00ff88':'#ff4444'}">Rp ${i.amount.toLocaleString()}</span></div>` + histEl.innerHTML;
         });
         document.getElementById('balance').innerText = "Rp " + total.toLocaleString();
     }
-    render();
+    renderJurnal();
 </script>
 </body>
 </html>
