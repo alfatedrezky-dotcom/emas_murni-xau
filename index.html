@@ -2,129 +2,165 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMC ULTRA-PRECISION TERMINAL</title>
+    <title>SMC ELITE - THE FED WATCH</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        :root { --bg: #050505; --panel: #111; --gold: #ffd700; --buy: #00ff88; --sell: #ff4444; }
-        body { background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
-        .dashboard { display: grid; grid-template-columns: 300px 1fr 300px; gap: 15px; height: 95vh; }
-        .panel { background: var(--panel); border: 1px solid #222; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        :root { --gold: #ffd700; --bg: #050505; --panel: #111; --text: #e0e0e0; }
+        body { background: var(--bg); color: var(--text); font-family: 'Lexend', sans-serif; margin: 0; overflow: hidden; }
         
-        /* Price Display */
-        #price { font-size: 56px; font-weight: 800; text-align: center; color: var(--gold); letter-spacing: -2px; margin: 10px 0; transition: 0.3s; }
-        .price-up { color: var(--buy) !important; text-shadow: 0 0 20px rgba(0,255,136,0.4); }
-        .price-down { color: var(--sell) !important; text-shadow: 0 0 20px rgba(255,68,68,0.4); }
+        /* HEADER DENGAN LOGO */
+        header { 
+            background: linear-gradient(to bottom, #1a1a1a, #000); 
+            padding: 15px 25px; border-bottom: 2px solid var(--gold);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo-section { display: flex; align-items: center; gap: 15px; }
+        .logo-img { width: 40px; height: 40px; }
+        .header-title { font-size: 20px; font-weight: bold; letter-spacing: 2px; color: var(--gold); }
 
-        /* Signal Box */
-        .signal-card { padding: 15px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 18px; border: 1px solid #333; margin-bottom: 20px; text-transform: uppercase; }
-        .sig-buy { background: rgba(0,255,136,0.1); border-color: var(--buy); color: var(--buy); }
-        .sig-sell { background: rgba(255,68,68,0.1); border-color: var(--sell); color: var(--sell); }
+        /* NAVIGASI HALAMAN */
+        nav { display: flex; background: #000; border-bottom: 1px solid #222; }
+        .nav-link { 
+            padding: 15px 25px; cursor: pointer; border-right: 1px solid #222; 
+            font-size: 13px; font-weight: bold; color: #666; transition: 0.3s;
+        }
+        .nav-link:hover, .nav-link.active { color: var(--gold); background: #1a1a1a; }
 
-        /* Ledger & Log */
-        .scroll-area { flex-grow: 1; overflow-y: auto; font-size: 12px; padding-right: 5px; }
-        .log-item { padding: 8px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
-        .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        /* KONTEN HALAMAN */
+        .page { display: none; padding: 20px; height: calc(100vh - 150px); overflow-y: auto; }
+        .page.active { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         
-        input, button { width: 100%; padding: 12px; margin: 5px 0; border-radius: 6px; border: none; font-weight: bold; }
-        input { background: #1a1a1a; color: #fff; border: 1px solid #333; }
-        .btn-in { background: var(--buy); color: #000; }
-        .btn-out { background: var(--sell); color: #fff; }
+        /* CARD STYLE */
+        .card { background: var(--panel); border: 1px solid #222; border-radius: 12px; padding: 20px; }
+        #main-price { font-size: 80px; font-weight: 800; color: var(--gold); text-align: center; margin: 20px 0; }
+        
+        /* FINANCE INPUT */
+        input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 12px; margin: 5px 0; border-radius: 6px; }
+        .btn-gold { background: var(--gold); color: #000; border: none; padding: 12px; width: 100%; font-weight: bold; border-radius: 6px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div class="dashboard">
-    <div class="panel">
-        <h3 style="color: var(--gold); margin-top: 0;">FINANCE LEDGER</h3>
-        <h2 id="balance" style="font-size: 28px; margin: 10px 0;">Rp 0</h2>
-        <input type="text" id="desc" placeholder="Keterangan Transaksi">
+<header>
+    <div class="logo-section">
+        <img src="https://cdn-icons-png.flaticon.com/512/2454/2454282.png" class="logo-img" title="Gold Logo">
+        <div class="header-title">SMC ULTRA-PRECISION TERMINAL</div>
+    </div>
+    <div class="logo-section">
+        <div style="text-align: right; font-size: 10px; color: #888;">INSTITUTIONAL GRADE<br><b>THE FED WATCH</b></div>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Seal_of_the_United_States_Federal_Reserve_System.svg" class="logo-img" style="filter: brightness(0) invert(1);">
+    </div>
+</header>
+
+<nav>
+    <div class="nav-link active" onclick="showPage('market')">MARKET TERMINAL</div>
+    <div class="nav-link" onclick="showPage('finance')">FINANCE LEDGER</div>
+    <div class="nav-link" onclick="showPage('news')">ECONOMY CALENDAR</div>
+</nav>
+
+<div id="market" class="page active">
+    <div class="card" style="grid-column: span 2;">
+        <div style="text-align: center; color: #555; font-size: 12px;">XAU/USD LIVE DATA (1 MINUTE SYNC)</div>
+        <div id="main-price">0000.00</div>
+        <div id="signal-stat" style="text-align: center; padding: 10px; border-radius: 5px; border: 1px solid #333; width: 200px; margin: 0 auto;">STABILIZING...</div>
+    </div>
+    <div class="card">
+        <h4 style="color: var(--gold)">SIGNAL LOG</h4>
+        <div id="signal-log" style="font-size: 12px; color: #888; line-height: 2;"></div>
+    </div>
+    <div class="card">
+        <h4 style="color: var(--gold)">SYSTEM STATUS</h4>
+        <div style="color: #00ff88;">● Connection: Secured</div>
+        <div style="color: #00ff88;">● Sync Mode: 60s Cycle</div>
+        <div style="color: #00ff88;">● Encryption: Active</div>
+    </div>
+</div>
+
+<div id="finance" class="page">
+    <div class="card">
+        <h3 style="color: var(--gold)">ACCOUNT BALANCE</h3>
+        <h1 id="total-balance" style="font-size: 40px;">Rp 0</h1>
+        <hr border="0" style="border-bottom: 1px solid #222;">
+        <input type="text" id="desc" placeholder="Keterangan">
         <input type="number" id="amt" placeholder="Jumlah (Rp)">
-        <button class="btn-in" onclick="addTx('IN')">DEPOSIT (+)</button>
-        <button class="btn-out" onclick="addTx('OUT')">WITHDRAW (-)</button>
-        <div class="scroll-area" id="tx-hist" style="margin-top: 15px;"></div>
+        <button class="btn-gold" onclick="saveTx()">EXECUTE TRANSACTION</button>
     </div>
-
-    <div class="panel" style="justify-content: center;">
-        <div style="text-align: center; color: #666; font-size: 12px; letter-spacing: 2px;">XAU/USD LIVE TRACKER</div>
-        <div id="price">0000.00</div>
-        <div id="signal-box" class="signal-card">INITIALIZING ENGINE...</div>
-        <div style="height: 300px; border: 1px dashed #333; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #444;">
-            [ CHART AREA - READY ]
-        </div>
+    <div class="card">
+        <h4 style="color: var(--gold)">HISTORY</h4>
+        <div id="tx-history" style="font-size: 13px;"></div>
     </div>
+</div>
 
-    <div class="panel">
-        <h3 style="color: var(--gold); margin-top: 0;">SIGNAL & NEWS LOG</h3>
-        <div class="scroll-area" id="news-log">
-            <div class="log-item" style="color: var(--buy);">[SYSTEM] Engine Connected</div>
+<div id="news" class="page" style="display:none; grid-template-columns: 1fr;">
+    <div class="card" style="height: 100%;">
+        <h3 style="color: var(--gold)">GLOBAL ECONOMIC EVENTS (CPI, NFP, FED)</h3>
+        <div class="tradingview-widget-container" style="height: 90%;">
+            <div class="tradingview-widget-container__widget"></div>
+            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
+            { "colorTheme": "dark", "width": "100%", "height": "100%", "locale": "id", "importanceFilter": "0,1", "currencyFilter": "USD" }
+            </script>
         </div>
     </div>
 </div>
 
 <script>
-    // Konfigurasi Database Sesuai Foto Kamu
-    const conf = { databaseURL: "https://emas-murni-xau-default-rtdb.firebaseio.com" };
-    firebase.initializeApp(conf);
+    // FIREBASE CONFIG
+    const firebaseConfig = { databaseURL: "https://emas-murni-xau-default-rtdb.firebaseio.com" };
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let lastPrice = 0;
-    let records = JSON.parse(localStorage.getItem('smc_finance')) || [];
-
-    // Main Price Listener
-    db.ref('live_monitor').on('value', (snap) => {
-        const data = snap.val();
-        if(!data || !data.price) return;
-
-        const p = data.price;
-        const priceEl = document.getElementById('price');
-        const sigEl = document.getElementById('signal-box');
-        
-        // Update Price & Animation
-        priceEl.innerText = p.toFixed(2);
-        priceEl.className = p > lastPrice ? 'price-up' : 'price-down';
-
-        // Signal Logic (Accurate Momentum)
-        if(lastPrice > 0 && p !== lastPrice) {
-            const side = p > lastPrice ? 'BUY' : 'SELL';
-            sigEl.innerText = side + " MOMENTUM CONFIRMED";
-            sigEl.className = "signal-card " + (side === 'BUY' ? 'sig-buy' : 'sig-sell');
-            
-            // Log Signal as News
-            addLog(side, p);
-        }
-
-        lastPrice = p;
-    });
-
-    function addLog(side, price) {
-        const log = document.getElementById('news-log');
-        const time = new Date().toLocaleTimeString();
-        const color = side === 'BUY' ? '#00ff88' : '#ff4444';
-        log.innerHTML = `<div class="log-item"><span style="color:${color}">[${side}]</span> <span>$${price}</span> <span style="color:#666">${time}</span></div>` + log.innerHTML;
+    // PAGE SWITCHER
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        const target = document.getElementById(pageId);
+        target.style.display = (pageId === 'news') ? 'block' : 'grid';
+        event.currentTarget.classList.add('active');
     }
 
-    function addTx(type) {
+    // LIVE PRICE & SIGNAL
+    let lastP = 0;
+    db.ref('live_monitor').on('value', (snap) => {
+        const val = snap.val();
+        if(!val || !val.price) return;
+        const p = val.price;
+        document.getElementById('main-price').innerText = p.toFixed(2);
+        
+        if(lastP > 0 && p !== lastP) {
+            const side = p > lastP ? 'BUY' : 'SELL';
+            const color = side === 'BUY' ? '#00ff88' : '#ff4444';
+            document.getElementById('signal-stat').innerText = side + " MOMENTUM";
+            document.getElementById('signal-stat').style.color = color;
+            document.getElementById('signal-stat').style.borderColor = color;
+            
+            const log = document.getElementById('signal-log');
+            log.innerHTML = `<div>[${new Date().toLocaleTimeString()}] ${side} confirmed at ${p}</div>` + log.innerHTML;
+        }
+        lastP = p;
+    });
+
+    // FINANCE LOGIC
+    let txs = JSON.parse(localStorage.getItem('smc_v4')) || [];
+    function saveTx() {
         const d = document.getElementById('desc').value;
         const a = parseFloat(document.getElementById('amt').value);
         if(!d || isNaN(a)) return;
-        records.push({ d, a, type, t: new Date().toLocaleString() });
-        localStorage.setItem('smc_finance', JSON.stringify(records));
-        renderFin();
+        txs.push({ d, a, t: new Date().toLocaleDateString() });
+        localStorage.setItem('smc_v4', JSON.stringify(txs));
+        renderLedger();
     }
-
-    function renderFin() {
+    function renderLedger() {
         let total = 0;
-        const h = document.getElementById('tx-hist');
-        h.innerHTML = '';
-        records.forEach(i => {
-            total += (i.type === 'IN' ? i.a : -i.a);
-            h.innerHTML = `<div class="log-item"><span>${i.d}</span> <span style="color:${i.type=='IN'?'#00ff88':'#ff4444'}">Rp ${i.a.toLocaleString()}</span></div>` + h.innerHTML;
+        const hist = document.getElementById('tx-history');
+        hist.innerHTML = '';
+        txs.forEach(i => {
+            total += i.a;
+            hist.innerHTML = `<div style="padding:5px 0; border-bottom:1px solid #222;">${i.t} - ${i.d}: <span style="color:var(--gold)">Rp ${i.a.toLocaleString()}</span></div>` + hist.innerHTML;
         });
-        document.getElementById('balance').innerText = "Rp " + total.toLocaleString();
+        document.getElementById('total-balance').innerText = "Rp " + total.toLocaleString();
     }
-    renderFin();
+    renderLedger();
 </script>
 </body>
 </html>
