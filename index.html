@@ -2,147 +2,149 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>SMC GOD PROTOCOL V5.0 - TOTAL INTEGRATION</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMC GOD PROTOCOL V8.0</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #ffd700; --green: #00ff88; --red: #ff3333; --bg: #000; --panel: #0a0a0a; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        :root { --gold: #FFD700; --bg: #0a0a0a; --card: #151515; --red: #ff3333; }
+        body { background: var(--bg); color: white; font-family: 'Courier New', monospace; margin: 0; overflow-x: hidden; }
         
-        /* 1. News Ticker (Versi 3.8) */
-        .news-ticker { background: #b08d00; color: #000; height: 22px; display: flex; align-items: center; font-size: 10px; font-weight: bold; overflow: hidden; z-index: 1000; }
-        .ticker-move { display: inline-block; animation: ticker 40s linear infinite; white-space: nowrap; }
-        @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-
-        /* 2. Navigation Tabs (Versi 4.5) */
-        .nav-tabs { display: flex; background: #111; border-bottom: 1px solid #222; z-index: 999; }
-        .tab-btn { flex: 1; padding: 12px; border: none; background: none; color: #666; cursor: pointer; font-family: 'Orbitron'; font-size: 10px; transition: 0.3s; border-bottom: 2px solid transparent; }
-        .tab-btn.active { color: var(--gold); border-bottom: 2px solid var(--gold); background: #1a1a1a; }
-
-        /* 3. Multi-Page System */
-        .main-container { flex: 1; position: relative; overflow: hidden; }
-        .page { position: absolute; width: 100%; height: 100%; display: none; background: #000; }
-        .page.active { display: block; }
-
-        /* Scalping Layout */
-        .scalp-grid { display: flex; height: 100%; }
-        .chart-area { flex: 3; position: relative; border-right: 1px solid #222; }
-        .mini-log { flex: 1; background: #050505; display: flex; flex-direction: column; font-family: 'Courier New', monospace; font-size: 11px; padding: 10px; color: var(--green); overflow-y: auto; }
-
-        /* 4. Floating Navigation (Modifikasi Baru) */
-        .floating-nav { position: fixed; bottom: 160px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 2000; }
-        .fab-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--gold); border: 2px solid #000; color: #000; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5); font-size: 9px; font-family: 'Orbitron'; display: flex; align-items: center; justify-content: center; text-align: center; }
-
-        /* Footer Fixed */
-        .footer { height: 140px; background: #050505; display: flex; padding: 10px; gap: 10px; border-top: 2px solid #1a1a1a; z-index: 999; }
-        .price-card { flex: 1; background: var(--panel); border: 1px solid #333; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; min-width: 220px; }
-        #price { font-size: 38px; color: var(--gold); font-family: 'Orbitron'; margin: 0; }
+        /* LOGIN SYSTEM */
+        #login-overlay { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        .login-box { background: #111; padding: 30px; border-radius: 15px; border: 1px solid var(--gold); width: 280px; text-align: center; }
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 10px; background: #222; border: 1px solid #444; color: white; border-radius: 5px; box-sizing: border-box; }
         
-        /* Flash Visual (Versi 3.8) */
-        .flash-buy { box-shadow: inset 0 0 100px #00ff8844; }
-        .flash-sell { box-shadow: inset 0 0 100px #ff333344; }
+        /* DASHBOARD LAYOUT */
+        .header-ticker { background: #1a1a1a; color: var(--gold); padding: 5px 0; font-size: 12px; border-bottom: 1px solid #333; }
+        .container { padding: 10px; max-width: 1200px; margin: auto; }
+        .card { background: var(--card); border-radius: 10px; padding: 15px; border: 1px solid #333; margin-bottom: 10px; }
+        
+        /* TABS */
+        .tab-parent { display: flex; gap: 5px; margin-bottom: 10px; }
+        .tab-btn { flex: 1; padding: 12px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; border-radius: 5px; }
+        .active-tab { background: var(--gold) !important; color: black !important; }
+        .inactive-tab { background: #222; color: white; }
+
+        /* STRENGTH METER */
+        .strength-bg { background: #222; height: 10px; border-radius: 5px; margin-top: 10px; overflow: hidden; }
+        #strength-bar { width: 0%; height: 100%; background: var(--gold); transition: 0.8s; }
+        
+        .price-text { font-size: 32px; font-weight: bold; color: var(--gold); }
+        iframe { border-radius: 8px; border: 1px solid #333; }
     </style>
 </head>
-<body id="body-main">
+<body>
 
-<div class="news-ticker">
-    <div class="ticker-move">
-        🔥 MONITORING HIGH IMPACT: CPI, NFP, GDP, FOMC - SMC GOD PROTOCOL ACTIVE - CHECK FUNDAMENTAL PAGE BEFORE TRADING...
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2 style="color: var(--gold); margin-bottom: 20px;">SYSTEM ACCESS</h2>
+            <input type="text" id="user-id" placeholder="USER ID">
+            <input type="password" id="user-pass" placeholder="PASSWORD">
+            <button onclick="checkLogin()" style="width: 100%; padding: 12px; background: var(--gold); border: none; cursor: pointer; font-weight: bold; border-radius: 5px;">AUTHORIZE</button>
+            <p id="login-err" style="color: var(--red); font-size: 11px; margin-top: 10px; display: none;">ACCESS DENIED!</p>
+        </div>
     </div>
-</div>
 
-<div class="nav-tabs">
-    <button class="tab-btn active" id="btn-scalp" onclick="openPage('scalp')">SCALPER VIEW</button>
-    <button class="tab-btn" id="btn-fund" onclick="openPage('fund')">FUNDAMENTAL NEWS</button>
-</div>
+    <div class="header-ticker">
+        <marquee scrollamount="5">⚠️ MONITORING HIGH IMPACT: CPI, NFP, GDP, FOMC - SMC GOD PROTOCOL ACTIVE - CHECK FUNDAMENTAL PAGE BEFORE TRADING...</marquee>
+    </div>
 
-<div class="floating-nav">
-    <button class="fab-btn" onclick="openPage('scalp')">CHART</button>
-    <button class="fab-btn" onclick="openPage('fund')" style="background: #fff;">NEWS</button>
-</div>
-
-<div class="main-container">
-    <div id="scalp" class="page active">
-        <div class="scalp-grid">
-            <div class="chart-area" id="chart-area">
-                <iframe src="https://s.tradingview.com/widgetembed/?symbol=OANDA%3AXAUUSD&interval=1&theme=dark" style="width:100%; height:100%; border:none;"></iframe>
+    <div class="container" id="main-ui" style="display: none;">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-size: 11px; color: #888;">XAU/USD LIVE (PAXG)</div>
+                    <div id="price" class="price-text">0.00</div>
+                </div>
+                <div style="text-align: right;">
+                    <div id="bias-label" style="font-size: 12px; color: #888;">BIAS: --</div>
+                    <div id="time-label" style="font-size: 10px; color: #555;">SYNC: --:--:--</div>
+                </div>
             </div>
-            <div class="mini-log" id="log-side">
-                <div style="color:var(--gold); font-weight:bold; border-bottom:1px solid #222; padding-bottom:5px; margin-bottom:5px;">SESSION LOG</div>
+            
+            <div id="prediction" style="margin-top: 10px; font-weight: bold; color: #00ff00;">INITIALIZING...</div>
+            
+            <div class="strength-bg"><div id="strength-bar"></div></div>
+            <div style="display: flex; justify-content: space-between; font-size: 10px; margin-top: 4px; color: #888;">
+                <span>STRENGTH METER</span><span id="strength-val">0%</span>
+            </div>
+        </div>
+
+        <div class="tab-parent">
+            <button id="btn-chart" class="tab-btn active-tab" onclick="switchTab('chart')">SCALPER VIEW</button>
+            <button id="btn-news" class="tab-btn inactive-tab" onclick="switchTab('news')">FUNDAMENTAL NEWS</button>
+        </div>
+
+        <div id="view-chart">
+            <iframe id="tv-widget" src="https://s.tradingview.com/widgetembed/?symbol=BINANCE%3APAXGUSDT&interval=1&theme=dark" style="width: 100%; height: 450px; border: none;"></iframe>
+        </div>
+
+        <div id="view-news" style="display: none;">
+            <div class="card" style="height: 450px; overflow: hidden; padding: 0;">
+                <iframe src="https://www.tradays.com/en/economic-calendar/widget?mode=2&theme=1" style="width: 100%; height: 100%; border: none;"></iframe>
             </div>
         </div>
     </div>
 
-    <div id="fund" class="page">
-        <iframe src="https://sslecal2.forexprostools.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=2,3&countries=5&calType=week&timeZone=55&lang=1" width="100%" height="100%" frameborder="0"></iframe>
-    </div>
-</div>
+    <audio id="alarm" src="https://www.soundjay.com/buttons/beep-01a.mp3"></audio>
 
-<div class="footer">
-    <div class="price-card" id="card-main">
-        <div id="bias-val" style="font-size: 9px; letter-spacing: 2px; color: #888;">BIAS: SYNCING...</div>
-        <div id="price">0.00</div>
-        <div id="signal" style="font-weight:bold; font-size: 12px; color: #555;">WAITING DATA</div>
-        <div id="timer" style="position: absolute; bottom: 8px; right: 12px; font-size: 10px; color: var(--gold); font-family: 'Orbitron';">00s</div>
-    </div>
-    <div style="flex:2; background:#000; border:1px solid #222; border-radius:8px; padding:10px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-        <button onclick="testSound()" style="background:var(--gold); border:none; border-radius:4px; font-family:'Orbitron'; font-size:10px; padding:8px 15px; cursor:pointer; font-weight:bold;">TEST ALARM</button>
-        <div id="session-info" style="font-size:10px; color:#555; margin-top:10px;">SCANNING MARKET SESSIONS...</div>
-    </div>
-</div>
+    <script>
+        const VALID_ID = "ADMIN_XAU";
+        const VALID_PASS = "GOD123";
 
-<script>
-    const firebaseConfig = { databaseURL: "https://emas-murni-xau-default-rtdb.firebaseio.com" };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+        // FIREBASE SETUP
+        firebase.initializeApp({ databaseURL: "https://emas-murni-xau-default-rtdb.firebaseio.com" });
+        const db = firebase.database();
 
-    const audioBuy = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-    const audioSell = new Audio('https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg');
+        function checkLogin() {
+            const u = document.getElementById('user-id').value;
+            const p = document.getElementById('user-pass').value;
+            if(u === VALID_ID && p === VALID_PASS) {
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('main-ui').style.display = 'block';
+                sessionStorage.setItem('logged', 'true');
+            } else {
+                document.getElementById('login-err').style.display = 'block';
+            }
+        }
 
-    function openPage(pageId) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(pageId).classList.add('active');
-        if(pageId === 'scalp') document.getElementById('btn-scalp').classList.add('active');
-        if(pageId === 'fund') document.getElementById('btn-fund').classList.add('active');
-    }
+        if(sessionStorage.getItem('logged') === 'true') {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('main-ui').style.display = 'block';
+        }
 
-    function testSound() { audioBuy.play(); alert("System V5.0 Ready!"); }
+        function switchTab(t) {
+            const isChart = t === 'chart';
+            document.getElementById('view-chart').style.display = isChart ? 'block' : 'none';
+            document.getElementById('view-news').style.display = isChart ? 'none' : 'block';
+            document.getElementById('btn-chart').className = isChart ? 'tab-btn active-tab' : 'tab-btn inactive-tab';
+            document.getElementById('btn-news').className = isChart ? 'tab-btn inactive-tab' : 'tab-btn active-tab';
+        }
 
-    db.ref('live_monitor').on('value', (s) => {
-        const d = s.val(); if(!d) return;
-        document.getElementById('price').innerText = d.price.toFixed(2);
-        document.getElementById('signal').innerText = d.prediction;
-        document.getElementById('bias-val').innerText = "BIAS: " + d.bias;
-        document.getElementById('bias-val').style.color = d.bias === "BULLISH" ? "var(--green)" : "var(--red)";
-        
-        const logSide = document.getElementById('log-side');
-        const entry = document.createElement('div');
-        entry.style.marginBottom = "4px";
-        entry.innerHTML = `<span style="color:#444">[${d.time}]</span> ${d.prediction}`;
-        logSide.insertBefore(entry, logSide.firstChild.nextSibling);
-        if(logSide.children.length > 15) logSide.removeChild(logSide.lastChild);
-        
-        const chartArea = document.getElementById('chart-area');
-        chartArea.className = "chart-area";
-        if(d.prediction.includes("GOD BUY")) { audioBuy.play(); chartArea.classList.add("flash-buy"); }
-        if(d.prediction.includes("GOD SELL")) { audioSell.play(); chartArea.classList.add("flash-sell"); }
-    });
+        // SYNC LOGIC
+        db.ref('live_monitor').on('value', (s) => {
+            const d = s.val(); if(!d) return;
+            
+            const now = Math.floor(Date.now() / 1000);
+            const expired = (now - d.timestamp) > 180; // Expire 3 Menit
 
-    setInterval(() => {
-        const seconds = 60 - new Date().getSeconds();
-        document.getElementById('timer').innerText = (seconds < 10 ? "0" : "") + seconds + "s";
-    }, 1000);
+            document.getElementById('price').innerText = d.price;
+            document.getElementById('prediction').innerText = expired ? "OFFLINE / LAG ⌛" : d.prediction;
+            document.getElementById('prediction').style.color = expired ? "#666" : (d.prediction.includes("GOD") ? "#00ff00" : "#fff");
+            document.getElementById('bias-label').innerText = "BIAS: " + d.bias;
+            document.getElementById('time-label').innerText = "SYNC: " + d.time;
 
-    function updateSession() {
-        const hour = new Date().getUTCHours();
-        let session = "ASIA SESSION";
-        if (hour >= 7 && hour < 16) session = "LONDON SESSION 🇬🇧";
-        if (hour >= 13 && hour < 22) session = "NEW YORK SESSION 🇺🇸";
-        document.getElementById('session-info').innerText = session;
-    }
-    updateSession(); setInterval(updateSession, 60000);
-</script>
+            // Strength Visual
+            const bar = document.getElementById('strength-bar');
+            bar.style.width = d.strength + "%";
+            document.getElementById('strength-val').innerText = d.strength + "%";
+            bar.style.background = d.strength > 80 ? "var(--red)" : "var(--gold)";
+
+            if(!expired && d.prediction.includes("GOD")) {
+                document.getElementById('alarm').play().catch(()=>{});
+            }
+        });
+    </script>
 </body>
 </html>
