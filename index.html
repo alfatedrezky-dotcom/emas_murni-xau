@@ -3,84 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMC ULTRA SYNC V11.5</title>
+    <title>SMC ULTRA SYNC V16.0</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         :root { --gold: #FFD700; --bg: #050505; --card: #111; --red: #ff3333; --green: #00ff00; }
-        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
-        
-        /* AUTH SYSTEM */
-        #auth-screen { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; justify-content: center; align-items: center; }
-        .auth-box { background: #151515; padding: 40px; border-radius: 20px; border: 1px solid var(--gold); text-align: center; width: 300px; }
-        input { width: 100%; padding: 12px; margin: 10px 0; background: #222; border: 1px solid #333; color: white; border-radius: 8px; box-sizing: border-box; }
-        
-        /* DASHBOARD LAYOUT */
+        body { background: var(--bg); color: white; font-family: sans-serif; margin: 0; }
         .container { padding: 15px; max-width: 1200px; margin: auto; }
-        .main-card { background: var(--card); border-radius: 15px; padding: 25px; border: 1px solid #222; margin-bottom: 15px; transition: 0.5s; }
         
-        /* SIGNAL GLOW EFFECTS */
+        /* CARD UTAMA DENGAN GLOW */
+        .main-card { background: var(--card); border-radius: 15px; padding: 25px; border: 1px solid #222; position: relative; transition: 0.5s; }
         .glow-buy { box-shadow: 0 0 30px rgba(0,255,0,0.2); border-color: var(--green); }
         .glow-sell { box-shadow: 0 0 30px rgba(255,51,51,0.2); border-color: var(--red); }
 
-        .price-val { font-size: 42px; font-weight: 800; color: var(--gold); letter-spacing: -1px; }
-        .badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .price-val { font-size: 42px; font-weight: 800; color: var(--gold); }
+        .badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
         
-        /* TP/SL BOX */
-        .tpsl-container { display: flex; gap: 10px; margin-top: 15px; font-size: 12px; }
-        .tpsl-box { flex: 1; padding: 10px; border-radius: 8px; background: #1a1a1a; border: 1px solid #333; }
-
-        /* TAB SYSTEM */
-        .tab-nav { display: flex; gap: 8px; margin-bottom: 15px; }
-        .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .tpsl-box { flex: 1; padding: 10px; border-radius: 8px; background: #1a1a1a; border: 1px solid #333; font-size: 12px; }
+        .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .active { background: var(--gold); color: black; }
         .inactive { background: #1a1a1a; color: #666; }
-
-        .meter { background: #222; height: 6px; border-radius: 10px; margin: 15px 0 5px; }
-        #fill { width: 0%; height: 100%; background: var(--gold); transition: 1s ease-in-out; }
     </style>
 </head>
 <body>
 
-    <div id="auth-screen">
-        <div class="auth-box">
-            <h2 style="color: var(--gold); margin: 0;">MT5 SYNC</h2>
-            <p style="color: #555; font-size: 12px; margin-bottom: 20px;">V11.5 ULTRA ACCURACY</p>
-            <input type="password" id="passkey" placeholder="ACCESS KEY">
-            <button onclick="unlock()" style="width:100%; padding:12px; background:var(--gold); border:none; border-radius:8px; font-weight:bold; cursor:pointer;">AUTHORIZE</button>
-        </div>
-    </div>
-
-    <div class="container" id="main-ui" style="display: none;">
+    <div class="container">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
             <div id="status" style="font-size:10px; color:var(--green);">● ENGINE CONNECTED</div>
             <div id="clock" style="font-size:12px; color:#666;">00:00:00</div>
         </div>
 
         <div class="main-card" id="signal-card">
-            <div style="display:flex; justify-content:space-between; align-items:start;">
+            <div style="display:flex; justify-content:space-between;">
                 <div>
                     <span class="badge" id="bias-badge" style="background:#222;">SCANNING...</span>
                     <div class="price-val" id="price">0.00</div>
                 </div>
                 <div style="text-align:right;">
                     <div id="sig-text" style="font-size:18px; font-weight:bold;">WAITING SETUP</div>
-                    <div id="sync-time" style="font-size:10px; color:#444;">SYNC: --:--:--</div>
+                    <div id="sync-time" style="font-size:10px; color:#444;">SYNC: --:--</div>
                 </div>
             </div>
 
-            <div class="meter"><div id="fill"></div></div>
-            <div style="display:flex; justify-content:space-between; font-size:10px; color:#555;">
-                <span>MARKET STRENGTH</span><span id="stg-val">0%</span>
+            <div style="background:#222; height:6px; border-radius:10px; margin:15px 0 5px;">
+                <div id="fill" style="width:0%; height:100%; background:var(--gold); transition:1s;"></div>
             </div>
 
-            <div class="tpsl-container">
+            <div style="display:flex; gap:10px; margin-top:15px;">
                 <div class="tpsl-box">SL: <span id="sl-val" style="color:var(--red);">--</span></div>
                 <div class="tpsl-box">TP: <span id="tp-val" style="color:var(--green);">--</span></div>
+                <div class="tpsl-box" style="border-color:var(--gold);">RR: <span id="rr-val">1:2</span></div>
             </div>
         </div>
 
-        <div class="tab-nav">
+        <div style="display:flex; gap:8px; margin: 15px 0;">
             <button id="btn-c" class="tab-btn active" onclick="tab('c')">MT5 CHART</button>
             <button id="btn-n" class="tab-btn inactive" onclick="tab('n')">ECONOMIC NEWS</button>
         </div>
@@ -88,71 +64,41 @@
         <div id="view-c">
             <iframe src="https://s.tradingview.com/widgetembed/?symbol=OANDA%3AXAUUSD&interval=1&theme=dark" style="width:100%; height:450px; border:none; border-radius:12px;"></iframe>
         </div>
-        <div id="view-n" style="display:none;">
-            <iframe src="https://www.tradays.com/en/economic-calendar/widget?mode=2&theme=1" style="width:100%; height:450px; border:none; border-radius:12px;"></iframe>
-        </div>
     </div>
 
-    <audio id="beep" src="https://www.soundjay.com/buttons/beep-01a.mp3"></audio>
-
     <script>
-        function unlock() {
-            if(document.getElementById('passkey').value === 'GOD123') {
-                document.getElementById('auth-screen').style.display='none';
-                document.getElementById('main-ui').style.display='block';
-                sessionStorage.setItem('auth_v11', '1');
-            }
-        }
-        if(sessionStorage.getItem('auth_v11')==='1'){
-            document.getElementById('auth-screen').style.display='none';
-            document.getElementById('main-ui').style.display='block';
-        }
-
-        function tab(t){
-            document.getElementById('view-c').style.display = t==='c'?'block':'none';
-            document.getElementById('view-n').style.display = t==='n'?'block':'none';
-            document.getElementById('btn-c').className = t==='c'?'tab-btn active':'tab-btn inactive';
-            document.getElementById('btn-n').className = t==='n'?'tab-btn active':'tab-btn inactive';
-        }
-
+        // Inisialisasi Firebase
         firebase.initializeApp({ databaseURL: "https://emas-murni-xau-default-rtdb.firebaseio.com" });
-        firebase.database().ref('live_monitor').on('value', (s) => {
-            const d = s.val(); if(!d) return;
-            const lag = (Math.floor(Date.now()/1000) - d.timestamp) > 90;
+        const db = firebase.database().ref('live_monitor');
 
-            document.getElementById('price').innerText = d.price;
-            document.getElementById('sync-time').innerText = "SYNC: " + d.time;
-            document.getElementById('stg-val').innerText = d.strength + "%";
-            document.getElementById('fill').style.width = d.strength + "%";
+        db.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if(!data) return;
 
+            // Update Harga dan Sinyal
+            document.getElementById('price').innerText = data.price;
+            document.getElementById('sig-text').innerText = data.prediction;
+            document.getElementById('sync-time').innerText = "SYNC: " + data.time;
+            document.getElementById('fill').style.width = data.strength + "%";
+            
+            // Bias Badge & Glow Effect
             const card = document.getElementById('signal-card');
-            const sigT = document.getElementById('sig-text');
             const biasB = document.getElementById('bias-badge');
-            const price = parseFloat(d.price);
+            
+            biasB.innerText = data.bias + " BIAS";
+            biasB.style.color = data.bias === "BULLISH" ? "var(--green)" : "var(--red)";
 
-            if(lag) {
-                sigT.innerText = "OFFLINE"; card.className = "main-card";
+            // Sinkronisasi Fitur Glow
+            if(data.prediction.includes("BUY")) {
+                card.className = "main-card glow-buy";
+                document.getElementById('sl-val').innerText = (data.price - 2.50).toFixed(2);
+                document.getElementById('tp-val').innerText = (data.price + 5.00).toFixed(2);
+            } else if(data.prediction.includes("SELL")) {
+                card.className = "main-card glow-sell";
+                document.getElementById('sl-val').innerText = (data.price + 2.50).toFixed(2);
+                document.getElementById('tp-val').innerText = (data.price - 5.00).toFixed(2);
             } else {
-                sigT.innerText = d.prediction;
-                biasB.innerText = d.bias + " BIAS";
-                biasB.style.background = d.bias === "BEARISH" ? "#311" : "#131";
-                biasB.style.color = d.bias === "BEARISH" ? "#ff4444" : "#44ff44";
-
-                if(d.prediction.includes("BUY")) {
-                    card.className = "main-card glow-buy"; sigT.style.color = "#00ff00";
-                    document.getElementById('sl-val').innerText = (price - 2.50).toFixed(2);
-                    document.getElementById('tp-val').innerText = (price + 5.00).toFixed(2);
-                    document.getElementById('beep').play().catch(()=>{});
-                } else if(d.prediction.includes("SELL")) {
-                    card.className = "main-card glow-sell"; sigT.style.color = "#ff3333";
-                    document.getElementById('sl-val').innerText = (price + 2.50).toFixed(2);
-                    document.getElementById('tp-val').innerText = (price - 5.00).toFixed(2);
-                    document.getElementById('beep').play().catch(()=>{});
-                } else {
-                    card.className = "main-card"; sigT.style.color = "white";
-                    document.getElementById('sl-val').innerText = "--";
-                    document.getElementById('tp-val').innerText = "--";
-                }
+                card.className = "main-card";
             }
         });
 
