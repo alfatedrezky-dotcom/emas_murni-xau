@@ -3,106 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMC ULTRA SYNC V16.0</title>
+    <title>XAU MONITOR V8.5 - SMC ELITE</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        :root { --gold: #FFD700; --bg: #050505; --card: #111; --red: #ff3333; --green: #00ff00; }
-        body { background: var(--bg); color: white; font-family: sans-serif; margin: 0; }
-        .container { padding: 15px; max-width: 1200px; margin: auto; }
-        
-        /* CARD UTAMA DENGAN GLOW */
-        .main-card { background: var(--card); border-radius: 15px; padding: 25px; border: 1px solid #222; position: relative; transition: 0.5s; }
-        .glow-buy { box-shadow: 0 0 30px rgba(0,255,0,0.2); border-color: var(--green); }
-        .glow-sell { box-shadow: 0 0 30px rgba(255,51,51,0.2); border-color: var(--red); }
+        :root { --gold: #FFD700; --bg: #0a0a0a; --card: #151515; --red: #ff4444; --green: #00ff66; }
+        body { background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden; }
+        .container { padding: 20px; max-width: 600px; margin: auto; }
 
-        .price-val { font-size: 42px; font-weight: 800; color: var(--gold); }
-        .badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+        /* HEADER & STATUS */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .status-dot { height: 8px; width: 8px; background: var(--green); border-radius: 50%; display: inline-block; margin-right: 5px; box-shadow: 0 0 10px var(--green); }
+
+        /* MAIN MONITOR CARD */
+        .main-card { background: var(--card); border-radius: 20px; padding: 25px; border: 1px solid #222; position: relative; transition: all 0.4s ease; }
+        .glow-buy { box-shadow: 0 0 40px rgba(0, 255, 102, 0.15); border-color: var(--green); }
+        .glow-sell { box-shadow: 0 0 40px rgba(255, 68, 68, 0.15); border-color: var(--red); }
+
+        .price-display { font-size: 48px; font-weight: 900; color: var(--gold); letter-spacing: -1px; margin: 5px 0; }
+        .signal-badge { background: #222; padding: 5px 15px; border-radius: 50px; font-size: 12px; font-weight: bold; border: 1px solid #333; }
         
-        .tpsl-box { flex: 1; padding: 10px; border-radius: 8px; background: #1a1a1a; border: 1px solid #333; font-size: 12px; }
-        .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .active { background: var(--gold); color: black; }
-        .inactive { background: #1a1a1a; color: #666; }
+        /* STRENGTH BAR */
+        .bar-container { background: #222; height: 8px; border-radius: 10px; margin: 20px 0; overflow: hidden; }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #fff); transition: width 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        /* TP/SL BOX */
+        .tpsl-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .box { background: #1a1a1a; padding: 12px; border-radius: 12px; border: 1px solid #282828; text-align: center; font-size: 11px; color: #888; }
+        .box b { display: block; font-size: 14px; margin-top: 4px; }
+
+        /* CHART VIEWPORT */
+        .chart-frame { width: 100%; height: 400px; border-radius: 20px; border: 1px solid #222; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <div id="status" style="font-size:10px; color:var(--green);">● ENGINE CONNECTED</div>
-            <div id="clock" style="font-size:12px; color:#666;">00:00:00</div>
-        </div>
+<div class="container">
+    <div class="header">
+        <div><span class="status-dot"></span> <small style="color:#666">MT5 SERVER SYNC</small></div>
+        <div id="realtime-clock" style="font-size: 12px; color: #444;">00:00:00</div>
+    </div>
 
-        <div class="main-card" id="signal-card">
-            <div style="display:flex; justify-content:space-between;">
-                <div>
-                    <span class="badge" id="bias-badge" style="background:#222;">SCANNING...</span>
-                    <div class="price-val" id="price">0.00</div>
-                </div>
-                <div style="text-align:right;">
-                    <div id="sig-text" style="font-size:18px; font-weight:bold;">WAITING SETUP</div>
-                    <div id="sync-time" style="font-size:10px; color:#444;">SYNC: --:--</div>
-                </div>
+    <div class="main-card" id="card-monitor">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <span id="bias-label" class="signal-badge">SCANNING...</span>
+                <div class="price-display" id="price-val">0000.00</div>
             </div>
-
-            <div style="background:#222; height:6px; border-radius:10px; margin:15px 0 5px;">
-                <div id="fill" style="width:0%; height:100%; background:var(--gold); transition:1s;"></div>
-            </div>
-
-            <div style="display:flex; gap:10px; margin-top:15px;">
-                <div class="tpsl-box">SL: <span id="sl-val" style="color:var(--red);">--</span></div>
-                <div class="tpsl-box">TP: <span id="tp-val" style="color:var(--green);">--</span></div>
-                <div class="tpsl-box" style="border-color:var(--gold);">RR: <span id="rr-val">1:2</span></div>
+            <div style="text-align: right;">
+                <div id="signal-text" style="font-size: 16px; font-weight: bold; color: #fff;">WAITING SETUP</div>
+                <small id="sync-tag" style="color: #444; font-size: 10px;">V8.5 ACTIVE</small>
             </div>
         </div>
 
-        <div style="display:flex; gap:8px; margin: 15px 0;">
-            <button id="btn-c" class="tab-btn active" onclick="tab('c')">MT5 CHART</button>
-            <button id="btn-n" class="tab-btn inactive" onclick="tab('n')">ECONOMIC NEWS</button>
+        <div class="bar-container">
+            <div id="strength-bar" class="bar-fill" style="width: 0%"></div>
         </div>
 
-        <div id="view-c">
-            <iframe src="https://s.tradingview.com/widgetembed/?symbol=OANDA%3AXAUUSD&interval=1&theme=dark" style="width:100%; height:450px; border:none; border-radius:12px;"></iframe>
+        <div class="tpsl-grid">
+            <div class="box">STOP LOSS <b id="sl-price" style="color:var(--red)">--</b></div>
+            <div class="box">TAKE PROFIT <b id="tp-price" style="color:var(--green)">--</b></div>
+            <div class="box" style="border-color: var(--gold);">R:R RATIO <b id="rr-val" style="color:var(--gold)">1:2</b></div>
         </div>
     </div>
 
-    <script>
-        // Inisialisasi Firebase
-        firebase.initializeApp({ databaseURL: "https://emas-murni-xau-default-rtdb.firebaseio.com" });
-        const db = firebase.database().ref('live_monitor');
+    <iframe class="chart-frame" src="https://s.tradingview.com/widgetembed/?symbol=OANDA%3AXAUUSD&interval=1&theme=dark"></iframe>
+</div>
 
-        db.on('value', (snapshot) => {
-            const data = snapshot.val();
-            if(!data) return;
+<script>
+    // Konfigurasi Firebase
+    const firebaseConfig = { databaseURL: "https://emas-murni-xau-default-rtdb.firebaseio.com" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database().ref('live_monitor');
 
-            // Update Harga dan Sinyal
-            document.getElementById('price').innerText = data.price;
-            document.getElementById('sig-text').innerText = data.prediction;
-            document.getElementById('sync-time').innerText = "SYNC: " + data.time;
-            document.getElementById('fill').style.width = data.strength + "%";
-            
-            // Bias Badge & Glow Effect
-            const card = document.getElementById('signal-card');
-            const biasB = document.getElementById('bias-badge');
-            
-            biasB.innerText = data.bias + " BIAS";
-            biasB.style.color = data.bias === "BULLISH" ? "var(--green)" : "var(--red)";
+    db.on('value', (snapshot) => {
+        const d = snapshot.val();
+        if(!d) return;
 
-            // Sinkronisasi Fitur Glow
-            if(data.prediction.includes("BUY")) {
-                card.className = "main-card glow-buy";
-                document.getElementById('sl-val').innerText = (data.price - 2.50).toFixed(2);
-                document.getElementById('tp-val').innerText = (data.price + 5.00).toFixed(2);
-            } else if(data.prediction.includes("SELL")) {
-                card.className = "main-card glow-sell";
-                document.getElementById('sl-val').innerText = (data.price + 2.50).toFixed(2);
-                document.getElementById('tp-val').innerText = (data.price - 5.00).toFixed(2);
-            } else {
-                card.className = "main-card";
-            }
-        });
+        // Sync Data Harga
+        document.getElementById('price-val').innerText = d.price.toFixed(2);
+        document.getElementById('signal-text').innerText = d.prediction;
+        document.getElementById('strength-bar').style.width = d.strength + "%";
+        document.getElementById('sync-tag').innerText = "SYNC: " + d.time;
 
-        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
-    </script>
+        // Logika Bias & Glow
+        const card = document.getElementById('card-monitor');
+        const biasLabel = document.getElementById('bias-label');
+        
+        biasLabel.innerText = d.bias + " BIAS";
+        biasLabel.style.color = d.bias === "BULLISH" ? "var(--green)" : "var(--red)";
+
+        if(d.prediction.includes("BUY")) {
+            card.className = "main-card glow-buy";
+            document.getElementById('sl-price').innerText = (d.price - 2.50).toFixed(2);
+            document.getElementById('tp-price').innerText = (d.price + 5.00).toFixed(2);
+        } else if(d.prediction.includes("SELL")) {
+            card.className = "main-card glow-sell";
+            document.getElementById('sl-price').innerText = (d.price + 2.50).toFixed(2);
+            document.getElementById('tp-price').innerText = (d.price - 5.00).toFixed(2);
+        } else {
+            card.className = "main-card";
+            document.getElementById('sl-price').innerText = "--";
+            document.getElementById('tp-price').innerText = "--";
+        }
+    });
+
+    setInterval(() => { 
+        document.getElementById('realtime-clock').innerText = new Date().toLocaleTimeString(); 
+    }, 1000);
+</script>
+
 </body>
 </html>
